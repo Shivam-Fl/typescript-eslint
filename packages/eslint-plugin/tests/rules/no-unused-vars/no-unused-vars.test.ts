@@ -905,6 +905,30 @@ export const ComponentFoo: Fragment = () => {
         },
       },
     },
+    {
+      code: `
+/* @jsxFrag Fragment */
+import { Fragment } from 'react';
+
+<>Test</>;
+      `,
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+    },
+    {
+      code: `
+/* @jsx MD */
+/* @jsxFrag Fragment */
+import MD from 'md';
+import { Fragment } from 'react';
+
+<>Test</>;
+      `,
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+    },
     `
 declare module 'foo' {
   type Test = 1;

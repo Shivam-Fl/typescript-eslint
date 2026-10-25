@@ -1,5 +1,6 @@
 import type { Lib, SourceType, TSESTree } from '@typescript-eslint/types';
 
+import { AST_TOKEN_TYPES } from '@typescript-eslint/types';
 import { visitorKeys } from '@typescript-eslint/visitor-keys';
 
 import type { ReferencerOptions } from './referencer';
@@ -78,6 +79,42 @@ const DEFAULT_OPTIONS: Required<AnalyzeOptions> = {
   sourceType: 'script',
 };
 
+const JSX_PRAGMA_COMMENT_REGEX = /(?:^|[\s*])@(jsx|jsxFrag)[ \t]+([^\s*]+)/g;
+
+/**
+ * Reads `@jsx` and `@jsxFrag` pragmas from the block comments before the first statement.
+ * As in TypeScript, the last occurrence of each pragma wins.
+ * Only the root identifier is kept (i.e. "preact" for "preact.h").
+ */
+function getJsxPragmasFromComments(tree: TSESTree.Program): {
+  jsxFragmentName?: string;
+  jsxPragma?: string;
+} {
+  const pragmas: { jsxFragmentName?: string; jsxPragma?: string } = {};
+  const firstStatementStart = tree.body.at(0)?.range[0] ?? Infinity;
+
+  for (const comment of tree.comments ?? []) {
+    if (
+      comment.type !== AST_TOKEN_TYPES.Block ||
+      comment.range[0] >= firstStatementStart
+    ) {
+      continue;
+    }
+    for (const [, name, value] of comment.value.matchAll(
+      JSX_PRAGMA_COMMENT_REGEX,
+    )) {
+      const root = value.split('.')[0];
+      if (name === 'jsx') {
+        pragmas.jsxPragma = root;
+      } else {
+        pragmas.jsxFragmentName = root;
+      }
+    }
+  }
+
+  return pragmas;
+}
+
 /**
  * Takes an AST and returns the analyzed scopes.
  */
@@ -103,6 +140,9 @@ export function analyze(
     lib: providedOptions?.lib ?? ['esnext'],
     sourceType: providedOptions?.sourceType ?? DEFAULT_OPTIONS.sourceType,
   };
+
+  // pragma comments take precedence over options, as they do in TypeScript
+  Object.assign(options, getJsxPragmasFromComments(tree));
 
   // ensure the option is lower cased
   options.lib = options.lib.map(l => l.toLowerCase() as Lib);

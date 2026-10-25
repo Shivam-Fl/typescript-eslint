@@ -150,6 +150,7 @@ function nestDescribe(
 
         try {
           const { scopeManager } = parseAndAnalyze(contents, options, {
+            comment: true,
             jsx: fixture.ext.endsWith('x'),
           });
           await expect(scopeManager).toMatchFileSnapshot(fixture.snapshotFile);
