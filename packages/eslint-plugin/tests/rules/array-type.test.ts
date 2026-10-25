@@ -443,6 +443,44 @@ declare module '2' {
     },
   ],
   invalid: [
+    {
+      code: 'type Foo = ReadonlyArray<X>[number];',
+      errors: [
+        {
+          column: 12,
+          data: {
+            className: 'ReadonlyArray',
+            readonlyPrefix: 'readonly ',
+            type: 'X',
+          },
+          endColumn: 28,
+          endLine: 1,
+          line: 1,
+          messageId: 'errorStringArray',
+        },
+      ],
+      options: [{ default: 'array' }],
+      output: 'type Foo = (readonly X[])[number];',
+    },
+    {
+      code: 'type Foo = ReadonlyArray<X>[number][];',
+      errors: [
+        {
+          column: 12,
+          data: {
+            className: 'ReadonlyArray',
+            readonlyPrefix: 'readonly ',
+            type: 'X',
+          },
+          endColumn: 28,
+          endLine: 1,
+          line: 1,
+          messageId: 'errorStringArray',
+        },
+      ],
+      options: [{ default: 'array' }],
+      output: 'type Foo = (readonly X[])[number][];',
+    },
     // Base cases from https://github.com/typescript-eslint/typescript-eslint/issues/2323#issuecomment-663977655
     {
       code: 'let a: Array<number> = [];',
