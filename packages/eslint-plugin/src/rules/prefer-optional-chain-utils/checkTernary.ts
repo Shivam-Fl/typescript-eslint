@@ -14,11 +14,7 @@ import type {
   PreferOptionalChainOptions,
 } from './PreferOptionalChainOptions';
 
-import {
-  isColonToken,
-  isNullLiteral,
-  isUndefinedIdentifier,
-} from '../../util';
+import { isColonToken, isNullLiteral, isUndefinedIdentifier } from '../../util';
 import { checkNullishAndReport } from './checkNullishAndReport';
 import { compareNodes, NodeComparisonResult } from './compareNodes';
 
