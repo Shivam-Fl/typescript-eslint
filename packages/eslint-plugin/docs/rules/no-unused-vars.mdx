@@ -11,6 +11,22 @@ import TabItem from '@theme/TabItem';
 
 It adds support for TypeScript features, such as types.
 
+## Suggestions
+
+This rule provides editor suggestions, which you can apply manually, for the cases where removing the code is safe:
+
+- Unused imports (see [`enableAutofixRemoval`](#enableautofixremoval) to apply these automatically).
+- Unused variables declared by themselves in a block, function, static block, or at the top level of a file, with no initializer and no references:
+
+```ts
+function example() {
+  let unused: number;
+}
+```
+
+No suggestion is provided for declarations with an initializer, because removing them could drop side effects.
+No suggestion is provided for declarations with multiple declarators, `declare` declarations, or declarations in definition files and namespaces.
+
 ## Options
 
 This rule extension provides the following additional options.
