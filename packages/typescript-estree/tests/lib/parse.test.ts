@@ -966,6 +966,6 @@ describe('parse() with long chains of binary operators', () => {
       tokens: true,
     });
 
-    expect(ast.tokens).toHaveLength(operandCount * 2 - 1);
+    expect(ast.tokens).toHaveLength(operandCount + (operandCount - 1));
   });
 });
