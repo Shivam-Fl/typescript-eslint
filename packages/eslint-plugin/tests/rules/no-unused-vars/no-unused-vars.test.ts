@@ -2255,23 +2255,6 @@ export namespace Foo {
           endLine: 7,
           line: 7,
           messageId: 'unusedVar',
-          suggestions: [
-            {
-              data: { varName: 'x' },
-              messageId: 'removeUnusedVar',
-              output: `
-// not declared
-export namespace Foo {
-  export namespace Bar {
-    export namespace Baz {
-      export namespace Bam {
-      }
-    }
-  }
-}
-      `,
-            },
-          ],
         },
       ],
     },
@@ -2428,14 +2411,6 @@ const foo: number = 1;
           endLine: 2,
           line: 2,
           messageId: 'unusedVar',
-          suggestions: [
-            {
-              data: { varName: 'foo' },
-              messageId: 'removeUnusedVar',
-              output: `
-      `,
-            },
-          ],
         },
       ],
     },
