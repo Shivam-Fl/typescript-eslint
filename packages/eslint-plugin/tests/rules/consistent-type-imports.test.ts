@@ -2416,7 +2416,15 @@ function Placeholder() {
 }
 export const value = Placeholder();
         `,
-        errors: [{ messageId: 'typeOverValue' }],
+        errors: [
+          {
+            column: 1,
+            endColumn: 42,
+            endLine: 2,
+            line: 2,
+            messageId: 'typeOverValue',
+          },
+        ],
         output: `
 import type { Placeholder } from 'placeholder';
 export type Config = { placeholder: Placeholder };
@@ -2437,7 +2445,15 @@ export function Main() {
   return <Placeholder />;
 }
         `,
-        errors: [{ messageId: 'typeOverValue' }],
+        errors: [
+          {
+            column: 1,
+            endColumn: 42,
+            endLine: 2,
+            line: 2,
+            messageId: 'typeOverValue',
+          },
+        ],
         languageOptions: {
           parserOptions: {
             ecmaFeatures: {

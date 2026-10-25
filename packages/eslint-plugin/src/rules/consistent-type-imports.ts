@@ -217,14 +217,12 @@ export default createRule<Options, MessageIds>({
           }
 
           const [variable] = context.sourceCode.getDeclaredVariables(specifier);
-          // A local value declared with the same name as the import shares
-          // the variable, so its value references do not refer to the import.
-          const hasLocalValueOnlyDefinition = variable.defs.some(
-            def =>
-              def.type !== DefinitionType.ImportBinding &&
-              !def.isTypeDefinition,
+          // A local function with the same name as the import shares its
+          // variable, so its value references do not refer to the import.
+          const hasLocalFunction = variable.defs.some(
+            def => def.type === DefinitionType.FunctionName,
           );
-          const references = hasLocalValueOnlyDefinition
+          const references = hasLocalFunction
             ? variable.references.filter(ref => !ref.isValueReference)
             : variable.references;
           if (references.length === 0) {
