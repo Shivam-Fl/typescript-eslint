@@ -97,7 +97,11 @@ array[array.length - 1];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '1' },
+          endColumn: 24,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -119,7 +123,11 @@ array[array.length - 2];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '2' },
+          endColumn: 24,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -141,7 +149,11 @@ array[array.length - 1];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '1' },
+          endColumn: 24,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -163,7 +175,11 @@ object.items[object.items.length - 1];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '1' },
+          endColumn: 38,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -185,7 +201,11 @@ const last = array[array.length - 1];
       `,
       errors: [
         {
+          column: 14,
           data: { offset: '1' },
+          endColumn: 37,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -207,7 +227,11 @@ declare const array: string[];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '1' },
+          endColumn: 26,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -225,11 +249,15 @@ declare const array: string[];
     {
       code: `
 declare const array: string[];
-array /* a */ [ /* b */ array /* c */ . /* d */ length /* e */ - /* f */ 1 /* g */ ] /* h */;
+array[/* a */ array /* b */.length /* c */ - /* d */ 1 /* e */];
       `,
       errors: [
         {
+          column: 1,
           data: { offset: '1' },
+          endColumn: 64,
+          endLine: 3,
+          line: 3,
           messageId: 'preferAt',
           suggestions: [
             {
@@ -237,7 +265,7 @@ array /* a */ [ /* b */ array /* c */ . /* d */ length /* e */ - /* f */ 1 /* g 
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: string[];
-array /* a */ .at( /* b */  /* c */  /* d */  /* e */ - /* f */ 1 /* g */ ) /* h */;
+array.at(/* a */  /* b */ /* c */ - /* d */ 1 /* e */);
       `,
             },
           ],
