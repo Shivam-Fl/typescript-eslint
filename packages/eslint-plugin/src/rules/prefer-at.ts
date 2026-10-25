@@ -14,6 +14,8 @@ import {
   isAssignee,
   isNodeEqual,
   isTypeArrayTypeOrUnionOfArrayTypes,
+  nullThrows,
+  NullThrowsReasons,
 } from '../util';
 
 export default createRule({
@@ -93,11 +95,14 @@ export default createRule({
               messageId: 'preferAtSuggestion',
               data,
               *fix(fixer) {
-                const openBracket = sourceCode.getTokenAfter(
-                  node.object,
-                  isOpeningBracketToken,
-                )!;
-                const closeBracket = sourceCode.getLastToken(node)!;
+                const openBracket = nullThrows(
+                  sourceCode.getTokenAfter(node.object, isOpeningBracketToken),
+                  NullThrowsReasons.MissingToken('[', 'member expression'),
+                );
+                const closeBracket = nullThrows(
+                  sourceCode.getLastToken(node),
+                  NullThrowsReasons.MissingToken(']', 'member expression'),
+                );
 
                 yield fixer.replaceText(openBracket, '.at(');
                 for (const token of lengthTokens) {

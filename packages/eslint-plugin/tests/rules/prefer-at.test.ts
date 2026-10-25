@@ -76,6 +76,8 @@ delete array[array.length - 1];
 declare const array: (() => void)[];
 array[array.length - 1]();
     `,
+    // prettier would remove the parentheses
+    // eslint-disable-next-line @typescript-eslint/internal/plugin-test-formatting
     `
 declare const array: string[];
 array[(array.length) - 1];
@@ -221,6 +223,8 @@ const last = array.at( - 1);
       ],
     },
     {
+      // prettier would remove the parentheses
+      // eslint-disable-next-line @typescript-eslint/internal/plugin-test-formatting
       code: `
 declare const array: string[];
 (array)[array.length - 1];
