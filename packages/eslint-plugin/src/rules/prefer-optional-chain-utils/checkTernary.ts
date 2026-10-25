@@ -24,6 +24,10 @@ function isQuestionToken(
   return token.type === AST_TOKEN_TYPES.Punctuator && token.value === '?';
 }
 
+function isExpression(node: TSESTree.Node): node is TSESTree.Expression {
+  return node.type !== AST_NODE_TYPES.PrivateIdentifier;
+}
+
 function isUndefined(node: TSESTree.Node): boolean {
   return (
     isUndefinedIdentifier(node) ||
@@ -52,7 +56,7 @@ function getComparedOperand(
     return undefined;
   }
   const { left, right } = node;
-  if (isValue(right) && left.type !== AST_NODE_TYPES.PrivateIdentifier) {
+  if (isValue(right) && isExpression(left)) {
     return left;
   }
   return isValue(left) ? right : undefined;
