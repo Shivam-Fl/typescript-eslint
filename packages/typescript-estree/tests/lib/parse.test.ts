@@ -948,3 +948,24 @@ x
     },
   );
 });
+
+describe('parse() with long chains of binary operators', () => {
+  const operandCount = 10_000;
+
+  it.each([
+    ['+', '"a"'],
+    ['||', 'a'],
+    [',', 'a'],
+  ])('does not overflow the stack for a chain of %s', (operator, operand) => {
+    const code = Array.from({ length: operandCount }, () => operand).join(
+      ` ${operator} `,
+    );
+
+    const ast = parser.parse(code, {
+      comment: true,
+      tokens: true,
+    });
+
+    expect(ast.tokens).toHaveLength(operandCount * 2 - 1);
+  });
+});

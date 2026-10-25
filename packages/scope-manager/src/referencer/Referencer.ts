@@ -333,6 +333,10 @@ export class Referencer extends Visitor {
     }
   }
 
+  /**
+   * Visits the operands of a (possibly long) chain of left-nested binary and
+   * logical expressions in source order, without recursing once per operator.
+   */
   protected visitJSXElement(
     node: TSESTree.JSXClosingElement | TSESTree.JSXOpeningElement,
   ): void {
@@ -350,6 +354,25 @@ export class Referencer extends Visitor {
       }
     } else {
       this.visit(node.name);
+    }
+  }
+
+  protected visitLeftNestedOperators(
+    node: TSESTree.BinaryExpression | TSESTree.LogicalExpression,
+  ): void {
+    const operators = [node];
+    let left = node.left;
+    while (
+      left.type === AST_NODE_TYPES.BinaryExpression ||
+      left.type === AST_NODE_TYPES.LogicalExpression
+    ) {
+      operators.push(left);
+      left = left.left;
+    }
+
+    this.visit(left);
+    for (let i = operators.length - 1; i >= 0; i--) {
+      this.visit(operators[i].right);
     }
   }
 
@@ -429,6 +452,12 @@ export class Referencer extends Visitor {
       this.visit(left);
     }
     this.visit(node.right);
+  }
+
+  protected BinaryExpression(
+    node: TSESTree.BinaryExpression | TSESTree.LogicalExpression,
+  ): void {
+    this.visitLeftNestedOperators(node);
   }
 
   protected BlockStatement(node: TSESTree.BlockStatement): void {
@@ -593,6 +622,12 @@ export class Referencer extends Visitor {
 
   protected LabeledStatement(node: TSESTree.LabeledStatement): void {
     this.visit(node.body);
+  }
+
+  protected LogicalExpression(
+    node: TSESTree.BinaryExpression | TSESTree.LogicalExpression,
+  ): void {
+    this.visitLeftNestedOperators(node);
   }
 
   protected MemberExpression(node: TSESTree.MemberExpression): void {

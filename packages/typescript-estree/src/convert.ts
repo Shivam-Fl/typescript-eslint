@@ -496,6 +496,55 @@ export class Converter {
     return result;
   }
 
+  /**
+   * Converts a BinaryExpression along with the BinaryExpressions nested in its
+   * left operand. Long chains such as `a + b + c + ...` are left-nested, so they
+   * are walked iteratively instead of recursing once per operator.
+   */
+  private convertBinaryExpressionChain(
+    top: ts.BinaryExpression,
+  ): TSESTree.Node {
+    const chain = [top];
+    const allowPatterns = [this.allowPattern];
+    let current = top;
+    while (
+      ts.isBinaryExpression(current.left) &&
+      (isComma(current.operatorToken) ||
+        getBinaryExpressionType(current.operatorToken).type !==
+          AST_NODE_TYPES.AssignmentExpression)
+    ) {
+      // the left operand of a sequence expression inherits the pattern state,
+      // that of any other (non-assignment) operator never allows patterns
+      allowPatterns.push(
+        isComma(current.operatorToken) && allowPatterns[chain.length - 1],
+      );
+      current = current.left;
+      chain.push(current);
+    }
+
+    const originalAllowPattern = this.allowPattern;
+
+    for (let i = 1; i < chain.length; i++) {
+      this.allowPattern = allowPatterns[i];
+      this.#checkSyntaxError(chain[i], chain[i - 1]);
+    }
+
+    let result: TSESTree.Node | undefined;
+    for (let i = chain.length - 1; i >= 0; i--) {
+      this.allowPattern = allowPatterns[i];
+      result = this.convertSingleBinaryExpression(chain[i], result);
+      if (i > 0) {
+        this.registerTSNodeInNodeMap(chain[i], result);
+      }
+    }
+
+    this.allowPattern = originalAllowPattern;
+    return result!;
+  }
+
+  /**
+   * @param left the already converted left operand, when it was part of the chain
+   */
   private convertImportAttributes(
     node: ts.ExportDeclaration | ts.ImportDeclaration,
   ): TSESTree.ImportAttribute[] {
@@ -561,6 +610,64 @@ export class Converter {
     }
 
     return this.convertJSXIdentifier(node);
+  }
+
+  private convertSingleBinaryExpression(
+    node: ts.BinaryExpression,
+    left?: TSESTree.Node,
+  ): TSESTree.Node {
+    // TypeScript uses BinaryExpression for sequences as well
+    if (isComma(node.operatorToken)) {
+      const result = this.createNode<TSESTree.SequenceExpression>(node, {
+        type: AST_NODE_TYPES.SequenceExpression,
+        expressions: [],
+      });
+
+      const convertedLeft = (left ??
+        this.convertChild(node.left)) as TSESTree.Expression;
+      if (
+        convertedLeft.type === AST_NODE_TYPES.SequenceExpression &&
+        node.left.kind !== SyntaxKind.ParenthesizedExpression
+      ) {
+        result.expressions.push(...convertedLeft.expressions);
+      } else {
+        result.expressions.push(convertedLeft);
+      }
+
+      result.expressions.push(
+        this.convertChild(node.right) as TSESTree.Expression,
+      );
+      return result;
+    }
+    const expressionType = getBinaryExpressionType(node.operatorToken);
+    if (
+      this.allowPattern &&
+      expressionType.type === AST_NODE_TYPES.AssignmentExpression
+    ) {
+      return this.createNode<TSESTree.AssignmentPattern>(node, {
+        type: AST_NODE_TYPES.AssignmentPattern,
+        decorators: [],
+        left: this.convertPattern(node.left, node),
+        optional: false,
+        right: this.convertChild(node.right),
+        typeAnnotation: undefined,
+      });
+    }
+    return this.createNode<
+      | TSESTree.AssignmentExpression
+      | TSESTree.BinaryExpression
+      | TSESTree.LogicalExpression
+    >(node, {
+      ...expressionType,
+      left:
+        left ??
+        this.converter(
+          node.left,
+          node,
+          expressionType.type === AST_NODE_TYPES.AssignmentExpression,
+        ),
+      right: this.convertChild(node.right),
+    });
   }
 
   /**
@@ -1798,55 +1905,7 @@ export class Converter {
       // Binary Operations
 
       case SyntaxKind.BinaryExpression: {
-        // TypeScript uses BinaryExpression for sequences as well
-        if (isComma(node.operatorToken)) {
-          const result = this.createNode<TSESTree.SequenceExpression>(node, {
-            type: AST_NODE_TYPES.SequenceExpression,
-            expressions: [],
-          });
-
-          const left = this.convertChild(node.left) as TSESTree.Expression;
-          if (
-            left.type === AST_NODE_TYPES.SequenceExpression &&
-            node.left.kind !== SyntaxKind.ParenthesizedExpression
-          ) {
-            result.expressions.push(...left.expressions);
-          } else {
-            result.expressions.push(left);
-          }
-
-          result.expressions.push(
-            this.convertChild(node.right) as TSESTree.Expression,
-          );
-          return result;
-        }
-        const expressionType = getBinaryExpressionType(node.operatorToken);
-        if (
-          this.allowPattern &&
-          expressionType.type === AST_NODE_TYPES.AssignmentExpression
-        ) {
-          return this.createNode<TSESTree.AssignmentPattern>(node, {
-            type: AST_NODE_TYPES.AssignmentPattern,
-            decorators: [],
-            left: this.convertPattern(node.left, node),
-            optional: false,
-            right: this.convertChild(node.right),
-            typeAnnotation: undefined,
-          });
-        }
-        return this.createNode<
-          | TSESTree.AssignmentExpression
-          | TSESTree.BinaryExpression
-          | TSESTree.LogicalExpression
-        >(node, {
-          ...expressionType,
-          left: this.converter(
-            node.left,
-            node,
-            expressionType.type === AST_NODE_TYPES.AssignmentExpression,
-          ),
-          right: this.convertChild(node.right),
-        });
+        return this.convertBinaryExpressionChain(node);
       }
 
       case SyntaxKind.PropertyAccessExpression: {
