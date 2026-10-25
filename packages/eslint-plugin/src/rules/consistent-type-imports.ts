@@ -1,6 +1,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import type { RuleListener } from '@typescript-eslint/utils/eslint-utils';
 
+import { DefinitionType } from '@typescript-eslint/scope-manager';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 import {
@@ -216,10 +217,20 @@ export default createRule<Options, MessageIds>({
           }
 
           const [variable] = context.sourceCode.getDeclaredVariables(specifier);
-          if (variable.references.length === 0) {
+          // A local value declared with the same name as the import shares
+          // the variable, so its value references do not refer to the import.
+          const hasLocalValueOnlyDefinition = variable.defs.some(
+            def =>
+              def.type !== DefinitionType.ImportBinding &&
+              !def.isTypeDefinition,
+          );
+          const references = hasLocalValueOnlyDefinition
+            ? variable.references.filter(ref => !ref.isValueReference)
+            : variable.references;
+          if (references.length === 0) {
             unusedSpecifiers.push(specifier);
           } else {
-            const onlyHasTypeReferences = variable.references.every(ref => {
+            const onlyHasTypeReferences = references.every(ref => {
               /**
                * keep origin import kind when export
                * export { Type }
