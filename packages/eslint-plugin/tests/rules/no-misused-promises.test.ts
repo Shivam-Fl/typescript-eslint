@@ -1044,7 +1044,7 @@ interface MyCall {
 }
 
 interface MyIndex {
-  [key: string]: () => void;
+  [key: string]: () => unknown;
   [key: number]: () => void;
 }
 
@@ -1066,6 +1066,7 @@ interface MyInterface extends MyCall, MyIndex, MyConstruct, MyMethods {
   [key: string]: () => void;
   [key: number]: () => void;
   doSyncThing(): void;
+  doAsyncThing(): Promise<void>;
   syncMethodProperty: () => void;
 }
       `,
@@ -3039,7 +3040,7 @@ interface MyCall {
 }
 
 interface MyIndex {
-  [key: string]: () => void;
+  [key: string]: () => unknown;
   [key: number]: () => void;
 }
 
@@ -3066,26 +3067,10 @@ interface MyInterface extends MyCall, MyIndex, MyConstruct, MyMethods {
       errors: [
         {
           column: 3,
-          data: { heritageTypeName: 'MyIndex' },
-          endColumn: 32,
-          endLine: 28,
-          line: 28,
-          messageId: 'voidReturnInheritedMethod',
-        },
-        {
-          column: 3,
           data: { heritageTypeName: 'MyMethods' },
           endColumn: 32,
           endLine: 28,
           line: 28,
-          messageId: 'voidReturnInheritedMethod',
-        },
-        {
-          column: 3,
-          data: { heritageTypeName: 'MyIndex' },
-          endColumn: 33,
-          endLine: 29,
-          line: 29,
           messageId: 'voidReturnInheritedMethod',
         },
       ],
@@ -3098,7 +3083,7 @@ interface MyCall {
 }
 
 interface MyIndex {
-  [key: string]: () => void;
+  [key: string]: () => unknown;
   [key: number]: () => void;
 }
 
@@ -3123,22 +3108,6 @@ interface MyInterface extends MyCall, MyIndex, MyConstruct, MyMethods {
 }
       `,
       errors: [
-        {
-          column: 3,
-          data: { heritageTypeName: 'MyIndex' },
-          endColumn: 33,
-          endLine: 28,
-          line: 28,
-          messageId: 'voidReturnInheritedMethod',
-        },
-        {
-          column: 3,
-          data: { heritageTypeName: 'MyIndex' },
-          endColumn: 43,
-          endLine: 29,
-          line: 29,
-          messageId: 'voidReturnInheritedMethod',
-        },
         {
           column: 3,
           data: { heritageTypeName: 'MyMethods' },
