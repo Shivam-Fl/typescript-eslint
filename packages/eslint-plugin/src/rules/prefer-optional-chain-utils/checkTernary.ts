@@ -7,16 +7,26 @@ import type {
   RuleContext,
 } from '@typescript-eslint/utils/ts-eslint';
 
-import { AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, AST_TOKEN_TYPES } from '@typescript-eslint/utils';
 
 import type {
   PreferOptionalChainMessageIds,
   PreferOptionalChainOptions,
 } from './PreferOptionalChainOptions';
 
-import { isNullLiteral, isUndefinedIdentifier } from '../../util';
+import {
+  isColonToken,
+  isNullLiteral,
+  isUndefinedIdentifier,
+} from '../../util';
 import { checkNullishAndReport } from './checkNullishAndReport';
 import { compareNodes, NodeComparisonResult } from './compareNodes';
+
+function isQuestionToken(
+  token: TSESTree.Token,
+): token is TSESTree.PunctuatorToken {
+  return token.type === AST_TOKEN_TYPES.Punctuator && token.value === '?';
+}
 
 function isUndefined(node: TSESTree.Node): boolean {
   return (
@@ -181,7 +191,7 @@ export function checkTernary(
     const colon = sourceCode.getFirstTokenBetween(
       node.consequent,
       node.alternate,
-      token => token.value === ':',
+      isColonToken,
     )!;
 
     // the ranges are the ternary syntax around the chain, which is removed
@@ -198,7 +208,7 @@ export function checkTernary(
       const question = sourceCode.getFirstTokenBetween(
         node.test,
         node.consequent,
-        token => token.value === '?',
+        isQuestionToken,
       )!;
       const chainStart = sourceCode.getTokenAfter(question)!;
       const chainEnd = sourceCode.getTokenBefore(colon)!;
