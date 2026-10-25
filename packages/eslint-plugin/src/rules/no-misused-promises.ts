@@ -582,18 +582,23 @@ export default createRule<Options, MessageId>({
         if (objType == null) {
           return;
         }
+        const methodName = tsNode.name.getText();
         const propertySymbol = tsutils
           .unionConstituents(objType)
-          .map(t => checker.getPropertyOfType(t, tsNode.name.getText()))
+          .map(t => checker.getPropertyOfType(t, methodName))
           .find(p => p);
-        if (propertySymbol == null) {
+
+        const contextualType =
+          propertySymbol != null
+            ? checker.getTypeOfSymbolAtLocation(propertySymbol, tsNode.name)
+            : getIndexSignatureValueType(
+                checker,
+                tsutils.unionConstituents(objType),
+                methodName,
+              );
+        if (contextualType == null) {
           return;
         }
-
-        const contextualType = checker.getTypeOfSymbolAtLocation(
-          propertySymbol,
-          tsNode.name,
-        );
 
         if (isVoidReturningFunctionType(checker, tsNode.name, contextualType)) {
           const functionNode = node.value as TSESTree.FunctionExpression;
@@ -725,13 +730,13 @@ export default createRule<Options, MessageId>({
       memberName: string,
     ): void {
       const heritageMember = getMemberIfExists(heritageType, memberName);
-      if (heritageMember == null) {
+      const memberType =
+        heritageMember != null
+          ? checker.getTypeOfSymbolAtLocation(heritageMember, nodeMember)
+          : getIndexSignatureValueType(checker, [heritageType], memberName);
+      if (memberType == null) {
         return;
       }
-      const memberType = checker.getTypeOfSymbolAtLocation(
-        heritageMember,
-        nodeMember,
-      );
       if (!isVoidReturningFunctionType(checker, nodeMember, memberType)) {
         return;
       }
@@ -1091,6 +1096,32 @@ function getMemberIfExists(
   return (
     symbolMemberMatch ?? tsutils.getPropertyOfType(type, escapedMemberName)
   );
+}
+
+/**
+ * @returns The value type of the string (or, for numeric names, number) index
+ * signature of the first of `types` that has one, if any.
+ */
+function getIndexSignatureValueType(
+  checker: ts.TypeChecker,
+  types: readonly ts.Type[],
+  memberName: string,
+): ts.Type | undefined {
+  const isNumericName = memberName.trim() !== '' && !isNaN(Number(memberName));
+  for (const type of types) {
+    const indexInfo = checker
+      .getIndexInfosOfType(type)
+      .find(
+        info =>
+          tsutils.isTypeFlagSet(info.keyType, ts.TypeFlags.String) ||
+          (isNumericName &&
+            tsutils.isTypeFlagSet(info.keyType, ts.TypeFlags.Number)),
+      );
+    if (indexInfo) {
+      return indexInfo.type;
+    }
+  }
+  return undefined;
 }
 
 function isStaticMember(node: TSESTree.Node): boolean {

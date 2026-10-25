@@ -1339,6 +1339,37 @@ return console.log('foo');
     `
 return Promise.resolve();
     `,
+    `
+const o: Record<string, () => Promise<void>> = {
+  async m(): Promise<void> {},
+};
+    `,
+    `
+const o: Record<string, () => unknown> = {
+  async m(): Promise<void> {},
+};
+    `,
+    `
+const o: { [key: number]: () => void } = {
+  async m(): Promise<void> {},
+};
+    `,
+    `
+interface Base {
+  [key: string]: () => Promise<void>;
+}
+interface Sub extends Base {
+  m(): Promise<void>;
+}
+    `,
+    `
+interface Base {
+  [key: number]: () => void;
+}
+interface Sub extends Base {
+  m(): Promise<void>;
+}
+    `,
   ],
 
   invalid: [
@@ -3745,6 +3776,99 @@ if (f()) {
           checksConditionals: {
             flagUnions: 'all',
           },
+        },
+      ],
+    },
+    {
+      code: `
+const o: Record<string, () => void> = {
+  async m(): Promise<void> {},
+};
+      `,
+      errors: [
+        {
+          column: 14,
+          endColumn: 27,
+          endLine: 3,
+          line: 3,
+          messageId: 'voidReturnProperty',
+        },
+      ],
+    },
+    {
+      code: `
+declare function takes(o: { [key: string]: () => void }): void;
+takes({
+  m(): Promise<void> {
+    return Promise.resolve();
+  },
+});
+      `,
+      errors: [
+        {
+          column: 8,
+          endColumn: 21,
+          endLine: 4,
+          line: 4,
+          messageId: 'voidReturnProperty',
+        },
+      ],
+    },
+    {
+      code: `
+const o: { [key: number]: () => void } = {
+  1(): Promise<void> {
+    return Promise.resolve();
+  },
+};
+      `,
+      errors: [
+        {
+          column: 8,
+          endColumn: 21,
+          endLine: 3,
+          line: 3,
+          messageId: 'voidReturnProperty',
+        },
+      ],
+    },
+    {
+      code: `
+interface Base {
+  [key: string]: () => void;
+}
+interface Sub extends Base {
+  m(): Promise<void>;
+}
+      `,
+      errors: [
+        {
+          column: 3,
+          data: { heritageTypeName: 'Base' },
+          endColumn: 22,
+          endLine: 6,
+          line: 6,
+          messageId: 'voidReturnInheritedMethod',
+        },
+      ],
+    },
+    {
+      code: `
+class Base {
+  [key: string]: () => void;
+}
+class Sub extends Base {
+  async m(): Promise<void> {}
+}
+      `,
+      errors: [
+        {
+          column: 3,
+          data: { heritageTypeName: 'Base' },
+          endColumn: 30,
+          endLine: 6,
+          line: 6,
+          messageId: 'voidReturnInheritedMethod',
         },
       ],
     },
