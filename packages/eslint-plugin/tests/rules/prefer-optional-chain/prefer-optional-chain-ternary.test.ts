@@ -134,7 +134,16 @@ foo == null ? undefined : foo.bar;
 declare const foo: { bar: number } | null | undefined;
 foo != null ? foo?.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 35,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -145,7 +154,16 @@ foo?.bar;
 declare const foo: { bar<T>(): T } | null | undefined;
 foo == null ? undefined : foo.bar<number>();
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 44,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar<T>(): T } | null | undefined;
 foo?.bar<number>();
@@ -156,7 +174,16 @@ foo?.bar<number>();
 declare const foo: { bar: number } | null | undefined;
 (foo) == null ? undefined : (foo).bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 38,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -164,7 +191,16 @@ declare const foo: { bar: number } | null | undefined;
 declare const foo: { bar: number } | null;
 foo == null ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 34,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       options: [{ requireNullish: true }],
       output: `
 declare const foo: { bar: number } | null;
@@ -176,7 +212,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 34,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -187,7 +232,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == undefined ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 39,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -198,7 +252,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 null == foo ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 34,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -209,7 +272,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null ? void 0 : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 31,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -220,7 +292,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo != null ? foo.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 34,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -231,7 +312,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo != undefined ? foo.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 39,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -242,7 +332,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo != null ? foo.bar : void 0;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 31,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -253,7 +352,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo === null || foo === undefined ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 56,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -264,7 +372,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo === undefined || foo === null ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 56,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -275,7 +392,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo !== null && foo !== undefined ? foo.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 56,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -286,7 +412,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo !== undefined && foo !== null ? foo.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 56,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.bar;
@@ -297,7 +432,16 @@ foo?.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null ? undefined : foo['bar'];
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 37,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo?.['bar'];
@@ -308,7 +452,16 @@ foo?.['bar'];
 declare const foo: { bar: number } | null | undefined;
 foo == null ? undefined : foo /* comment */ .bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 49,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: number } | null | undefined;
 foo /* comment */ ?.bar;
@@ -319,7 +472,16 @@ foo /* comment */ ?.bar;
 declare const foo: { bar: { baz: number } | null | undefined } | null | undefined;
 foo == null ? undefined : foo.bar?.baz;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 39,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: { baz: number } | null | undefined } | null | undefined;
 foo?.bar?.baz;
@@ -330,7 +492,16 @@ foo?.bar?.baz;
 declare const foo: { bar(): number } | null | undefined;
 foo == null ? undefined : foo.bar();
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 36,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar(): number } | null | undefined;
 foo?.bar();
@@ -341,7 +512,16 @@ foo?.bar();
 declare const foo: { bar: { baz: number } } | null | undefined;
 foo == null ? undefined : foo.bar.baz;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 38,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar: { baz: number } } | null | undefined;
 foo?.bar.baz;
@@ -352,7 +532,16 @@ foo?.bar.baz;
 declare const foo: { bar?: () => number };
 foo.bar == null ? undefined : foo.bar();
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 40,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: `
 declare const foo: { bar?: () => number };
 foo.bar?.();
@@ -363,7 +552,16 @@ foo.bar?.();
 declare const foo: { bar: number } | null | undefined;
 foo /* comment */ == null ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -371,7 +569,16 @@ foo /* comment */ == null ? undefined : foo.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null /* comment */ ? undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -379,7 +586,16 @@ foo == null /* comment */ ? undefined : foo.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null ? /* comment */ undefined : foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -387,7 +603,16 @@ foo == null ? /* comment */ undefined : foo.bar;
 declare const foo: { bar: number } | null | undefined;
 foo == null ? undefined : /* comment */ foo.bar;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -395,7 +620,16 @@ foo == null ? undefined : /* comment */ foo.bar;
 declare const foo: { bar: number } | null | undefined;
 foo != null /* comment */ ? foo.bar : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -403,7 +637,16 @@ foo != null /* comment */ ? foo.bar : undefined;
 declare const foo: { bar: number } | null | undefined;
 foo != null ? foo.bar /* comment */ : undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
     {
@@ -411,7 +654,16 @@ foo != null ? foo.bar /* comment */ : undefined;
 declare const foo: { bar: number } | null | undefined;
 foo != null ? foo.bar : /* comment */ undefined;
       `,
-      errors: [{ messageId: 'preferOptionalChain', suggestions: null }],
+      errors: [
+        {
+          column: 1,
+          endColumn: 48,
+          endLine: 3,
+          line: 3,
+          messageId: 'preferOptionalChain',
+          suggestions: null,
+        },
+      ],
       output: null,
     },
   ],
