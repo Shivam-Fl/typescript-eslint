@@ -1012,6 +1012,16 @@ enum Color {
 declare const n: number;
 const color = n as Color;
     `,
+    `
+type AnyObject =
+  { type: 'a'; options?: string } | { type: 'b'; options?: number };
+declare const obj1: AnyObject;
+declare const obj2: AnyObject;
+declare function use(obj: AnyObject): void;
+if (obj1.type === obj2.type) {
+  use({ ...obj1, options: obj2.options as any });
+}
+    `,
   ],
 
   invalid: [
