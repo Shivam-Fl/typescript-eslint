@@ -333,10 +333,6 @@ export class Referencer extends Visitor {
     }
   }
 
-  /**
-   * Visits the operands of a (possibly long) chain of left-nested binary and
-   * logical expressions in source order, without recursing once per operator.
-   */
   protected visitJSXElement(
     node: TSESTree.JSXClosingElement | TSESTree.JSXOpeningElement,
   ): void {
@@ -357,6 +353,10 @@ export class Referencer extends Visitor {
     }
   }
 
+  /**
+   * Visits the operands of a (possibly long) chain of left-nested binary and
+   * logical expressions in source order, without recursing once per operator.
+   */
   protected visitLeftNestedOperators(
     node: TSESTree.BinaryExpression | TSESTree.LogicalExpression,
   ): void {

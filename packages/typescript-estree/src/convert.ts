@@ -505,7 +505,6 @@ export class Converter {
     top: ts.BinaryExpression,
   ): TSESTree.Node {
     const chain = [top];
-    const allowPatterns = [this.allowPattern];
     let current = top;
     while (
       ts.isBinaryExpression(current.left) &&
@@ -513,25 +512,21 @@ export class Converter {
         getBinaryExpressionType(current.operatorToken).type !==
           AST_NODE_TYPES.AssignmentExpression)
     ) {
-      // the left operand of a sequence expression inherits the pattern state,
-      // that of any other (non-assignment) operator never allows patterns
-      allowPatterns.push(
-        isComma(current.operatorToken) && allowPatterns[chain.length - 1],
-      );
       current = current.left;
       chain.push(current);
     }
 
     const originalAllowPattern = this.allowPattern;
 
+    // every operand below the top one is converted with patterns disallowed
+    this.allowPattern = false;
     for (let i = 1; i < chain.length; i++) {
-      this.allowPattern = allowPatterns[i];
       this.#checkSyntaxError(chain[i], chain[i - 1]);
     }
 
     let result: TSESTree.Node | undefined;
     for (let i = chain.length - 1; i >= 0; i--) {
-      this.allowPattern = allowPatterns[i];
+      this.allowPattern = i === 0 ? originalAllowPattern : false;
       result = this.convertSingleBinaryExpression(chain[i], result);
       if (i > 0) {
         this.registerTSNodeInNodeMap(chain[i], result);
@@ -542,9 +537,6 @@ export class Converter {
     return result!;
   }
 
-  /**
-   * @param left the already converted left operand, when it was part of the chain
-   */
   private convertImportAttributes(
     node: ts.ExportDeclaration | ts.ImportDeclaration,
   ): TSESTree.ImportAttribute[] {
@@ -612,6 +604,9 @@ export class Converter {
     return this.convertJSXIdentifier(node);
   }
 
+  /**
+   * @param left the already converted left operand, when it was part of the chain
+   */
   private convertSingleBinaryExpression(
     node: ts.BinaryExpression,
     left?: TSESTree.Node,

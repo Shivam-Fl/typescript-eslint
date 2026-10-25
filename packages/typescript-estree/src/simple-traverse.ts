@@ -77,6 +77,7 @@ class SimpleTraverser {
       const keys = getVisitorKeysForNode(this.allVisitorKeys, node);
 
       // children are pushed in reverse so they are visited in key order
+      // (they are read once, right after the node itself is entered)
       for (let i = keys.length - 1; i >= 0; i--) {
         const childOrChildren = node[keys[i]];
 
