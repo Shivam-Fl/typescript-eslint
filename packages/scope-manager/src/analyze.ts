@@ -1,5 +1,6 @@
 import type { Lib, SourceType, TSESTree } from '@typescript-eslint/types';
 
+import { AST_TOKEN_TYPES } from '@typescript-eslint/types';
 import { visitorKeys } from '@typescript-eslint/visitor-keys';
 
 import type { ReferencerOptions } from './referencer';
@@ -93,7 +94,10 @@ function getJsxPragmasFromComments(tree: TSESTree.Program): {
   const firstStatementStart = tree.body.at(0)?.range[0] ?? Infinity;
 
   for (const comment of tree.comments ?? []) {
-    if (comment.type !== 'Block' || comment.range[0] >= firstStatementStart) {
+    if (
+      comment.type !== AST_TOKEN_TYPES.Block ||
+      comment.range[0] >= firstStatementStart
+    ) {
       continue;
     }
     for (const [, name, value] of comment.value.matchAll(
