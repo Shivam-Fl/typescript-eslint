@@ -613,14 +613,14 @@ export function convertToken(
  */
 export function convertTokens(ast: ts.SourceFile): TSESTree.Token[] {
   const result: TSESTree.Token[] = [];
-  /**
-   * @param node the ts.Node
-   */
-  function walk(node: ts.Node): void {
+  // Iterative (not recursive) so that deeply nested trees, such as a long
+  // chain of binary operators, cannot overflow the call stack.
+  const pending: ts.Node[] = [ast];
+  for (let node = pending.pop(); node; node = pending.pop()) {
     // TypeScript generates tokens for types in JSDoc blocks. Comment tokens
     // and their children should not be walked or added to the resulting tokens list.
     if (isComment(node) || isJSDocComment(node)) {
-      return;
+      continue;
     }
 
     const { kind } = node;
@@ -636,10 +636,12 @@ export function convertTokens(ast: ts.SourceFile): TSESTree.Token[] {
 
       result.push(token);
     } else {
-      node.getChildren(ast).forEach(walk);
+      const children = node.getChildren(ast);
+      for (let i = children.length - 1; i >= 0; i--) {
+        pending.push(children[i]);
+      }
     }
   }
-  walk(ast);
   return result;
 }
 

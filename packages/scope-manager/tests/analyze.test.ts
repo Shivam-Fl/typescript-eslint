@@ -13,4 +13,20 @@ describe('analyze()', () => {
       analyze(partialNode);
     }).toThrow();
   });
+
+  it.each(['+', '||'])(
+    'should not overflow the stack for a long chain of %s operators',
+    operator => {
+      const operandCount = 10_000;
+      const operands = Array.from({ length: operandCount }, () => 'x');
+      const ast = parse(`let x; ${operands.join(` ${operator} `)};`, {
+        range: true,
+      });
+
+      const scopeManager = analyze(ast);
+
+      const variable = scopeManager.globalScope?.set.get('x');
+      expect(variable?.references).toHaveLength(operandCount);
+    },
+  );
 });
