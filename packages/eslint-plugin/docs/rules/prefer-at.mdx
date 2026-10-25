@@ -1,0 +1,54 @@
+---
+description: 'Enforce using `.at()` to access the last element of an array.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+> 🛑 This file is source code, not the primary documentation location! 🛑
+>
+> See **https://typescript-eslint.io/rules/prefer-at** for documentation.
+
+ES2022 added `Array#at`, which accepts negative indices that count back from the end of the array.
+`array.at(-1)` is a shorter and clearer way to write `array[array.length - 1]`.
+
+This rule reports indexing an array with its own `length` minus a positive integer literal, such as `array[array.length - 1]`.
+The array expression must be the same on both sides and made up of identifiers, `this`, and property accesses, so `getArray()[getArray().length - 1]` is not reported.
+
+The fix is offered as a suggestion rather than an automatic fix, because `array[index]` is typed as the element type while `array.at(index)` is typed as the element type or `undefined`.
+The rule does not report assignments to the element (`array[array.length - 1] = value`), or calls of the element (`array[array.length - 1]()`) because `.at()` can't replace them.
+
+## Examples
+
+<Tabs>
+<TabItem value="❌ Incorrect">
+
+```ts
+declare const array: string[];
+
+array[array.length - 1];
+array[array.length - 2];
+```
+
+</TabItem>
+<TabItem value="✅ Correct">
+
+```ts
+declare const array: string[];
+
+array.at(-1);
+array.at(-2);
+array[0];
+
+declare const getArray: () => string[];
+getArray()[getArray().length - 1];
+```
+
+</TabItem>
+</Tabs>
+
+## When Not To Use It
+
+`Array#at` requires an ES2022 runtime or a polyfill.
+If your project supports older environments, such as Node.js versions before 16.6, don't enable this rule.
+This rule is not included in any preset for that reason.

@@ -49,6 +49,7 @@ export = {
     '@typescript-eslint/no-useless-default-assignment': 'off',
     '@typescript-eslint/non-nullable-type-assertion-style': 'off',
     '@typescript-eslint/only-throw-error': 'off',
+    '@typescript-eslint/prefer-at': 'off',
     '@typescript-eslint/prefer-destructuring': 'off',
     '@typescript-eslint/prefer-find': 'off',
     '@typescript-eslint/prefer-includes': 'off',
