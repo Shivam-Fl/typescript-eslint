@@ -1,5 +1,3 @@
-import { noFormat } from '@typescript-eslint/rule-tester';
-
 import rule from '../../../src/rules/prefer-optional-chain';
 import { createRuleTesterWithTypes } from '../../RuleTester';
 
@@ -125,7 +123,7 @@ obj.list?.push('a');
     },
     {
       code: `
-declare const handlers: Record<string, (() => void) | undefined>;
+declare const handlers: { a?: () => void };
 if (handlers['a']) handlers['a']();
       `,
       errors: [
@@ -138,12 +136,12 @@ if (handlers['a']) handlers['a']();
         },
       ],
       output: `
-declare const handlers: Record<string, (() => void) | undefined>;
+declare const handlers: { a?: () => void };
 handlers['a']?.();
       `,
     },
     {
-      code: noFormat`
+      code: `
 declare const list: string[] | null;
 if (list) list['push']('a');
       `,
@@ -156,7 +154,7 @@ if (list) list['push']('a');
           messageId: 'preferOptionalChain',
         },
       ],
-      output: noFormat`
+      output: `
 declare const list: string[] | null;
 list?.['push']('a');
       `,
@@ -174,6 +172,22 @@ if (list) {
           column: 1,
           endColumn: 2,
           endLine: 6,
+          line: 3,
+          messageId: 'preferOptionalChain',
+        },
+      ],
+      output: null,
+    },
+    {
+      code: `
+declare const list: string[] | undefined;
+if (list) (list).push('a');
+      `,
+      errors: [
+        {
+          column: 1,
+          endColumn: 28,
+          endLine: 3,
           line: 3,
           messageId: 'preferOptionalChain',
         },

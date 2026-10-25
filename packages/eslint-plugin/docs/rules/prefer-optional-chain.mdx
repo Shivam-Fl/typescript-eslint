@@ -39,9 +39,7 @@ foo.a !== null && foo.a !== undefined && foo.a.b;
 
 // With `if` statements that only call a method or function
 declare const callback: (() => void) | undefined;
-if (callback) {
-  callback();
-}
+if (callback) callback();
 ```
 
 </TabItem>

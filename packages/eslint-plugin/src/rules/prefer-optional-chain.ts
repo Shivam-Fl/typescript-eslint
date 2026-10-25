@@ -183,20 +183,21 @@ export default createRule<
               comment.range[1] > statement.range[1],
           );
         // the comments inside the statement are kept by the fix
+        // a parenthesized guard has no safe place to insert `?.`
         const separator = sourceCode.getTokenAfter(guarded);
         context.report({
           node,
           messageId: 'preferOptionalChain',
           fix:
-            hasCommentsToKeep || !separator
+            hasCommentsToKeep || separator?.value === ')'
               ? null
               : (fixer): RuleFix => {
-                  const isDot = separator.value === '.';
+                  const isDot = separator?.value === '.';
                   const statementText = sourceCode.text.slice(
                     statement.range[0],
                     statement.range[1],
                   );
-                  const offset = separator.range[0] - statement.range[0];
+                  const offset = separator!.range[0] - statement.range[0];
                   return fixer.replaceText(
                     node,
                     `${statementText.slice(0, offset)}?.${statementText.slice(
