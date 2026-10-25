@@ -867,6 +867,11 @@ export type Test<U> = U extends (arg: {
   ? I
   : never;
     `,
+    `
+export type Test<T> = T extends (T extends unknown ? infer R : never)
+  ? R
+  : never;
+    `,
     // https://github.com/typescript-eslint/typescript-eslint/issues/2455
     {
       code: `
