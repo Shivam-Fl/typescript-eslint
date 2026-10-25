@@ -1,3 +1,5 @@
+import { noFormat } from '@typescript-eslint/rule-tester';
+
 import rule from '../../../src/rules/prefer-optional-chain';
 import { createRuleTesterWithTypes } from '../../RuleTester';
 
@@ -179,7 +181,7 @@ if (list) {
       output: null,
     },
     {
-      code: `
+      code: noFormat`
 declare const list: string[] | undefined;
 if (list) (list).push('a');
       `,

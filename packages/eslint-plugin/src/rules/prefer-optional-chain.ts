@@ -163,7 +163,9 @@ export default createRule<
 
         const { callee } = statement.expression;
         const guarded =
-          callee.type === AST_NODE_TYPES.MemberExpression && !callee.optional
+          callee.type === AST_NODE_TYPES.MemberExpression &&
+          !callee.optional &&
+          compareNodes(test, callee) !== NodeComparisonResult.Equal
             ? callee.object
             : callee;
         if (compareNodes(test, guarded) !== NodeComparisonResult.Equal) {
