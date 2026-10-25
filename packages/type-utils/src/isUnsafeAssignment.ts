@@ -12,6 +12,9 @@ import { isTypeAnyType, isTypeUnknownType } from './predicates';
  * This also checks generic positions to ensure there's no unsafe sub-assignments.
  * Note: in the case of generic positions, it makes the assumption that the two types are the same.
  *
+ * When `checkObjectProperties` is true, the properties of object types are compared as well,
+ * so `{ foo: any }` is unsafe to assign to `{ foo: number }`.
+ *
  * @example See tests for examples
  *
  * @returns false if it's safe, or an object with the two types if it's unsafe
@@ -21,6 +24,7 @@ export function isUnsafeAssignment(
   receiver: ts.Type,
   checker: ts.TypeChecker,
   senderNode: TSESTree.Node | null,
+  checkObjectProperties = false,
 ): false | { receiver: ts.Type; sender: ts.Type } {
   return isUnsafeAssignmentWorker(
     type,
@@ -28,6 +32,7 @@ export function isUnsafeAssignment(
     checker,
     senderNode,
     new Map(),
+    checkObjectProperties,
   );
 }
 
@@ -37,6 +42,7 @@ function isUnsafeAssignmentWorker(
   checker: ts.TypeChecker,
   senderNode: TSESTree.Node | null,
   visited: Map<ts.Type, Set<ts.Type>>,
+  checkObjectProperties: boolean,
 ): false | { receiver: ts.Type; sender: ts.Type } {
   if (isTypeAnyType(type)) {
     // Allow assignment of any ==> unknown.
@@ -106,6 +112,7 @@ function isUnsafeAssignmentWorker(
         checker,
         senderNode,
         visited,
+        checkObjectProperties,
       );
       if (unsafe) {
         return { receiver, sender: type };
@@ -113,6 +120,33 @@ function isUnsafeAssignmentWorker(
     }
 
     return false;
+  }
+
+  if (
+    checkObjectProperties &&
+    tsutils.isObjectType(type) &&
+    tsutils.isObjectType(receiver) &&
+    !checker.isArrayType(type) &&
+    !checker.isTupleType(type)
+  ) {
+    for (const receiverProperty of checker.getPropertiesOfType(receiver)) {
+      const property = checker.getPropertyOfType(type, receiverProperty.name);
+      if (!property) {
+        continue;
+      }
+
+      const unsafe = isUnsafeAssignmentWorker(
+        checker.getTypeOfSymbol(property),
+        checker.getTypeOfSymbol(receiverProperty),
+        checker,
+        senderNode,
+        visited,
+        checkObjectProperties,
+      );
+      if (unsafe) {
+        return { receiver, sender: type };
+      }
+    }
   }
 
   return false;
