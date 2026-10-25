@@ -769,6 +769,37 @@ class Test3 {
   }
 }
     `,
+    `
+export class OuterClass {
+  private wasWritten = false;
+
+  public getInner() {
+    const outer = this;
+
+    return class {
+      public doSomething() {
+        outer.wasWritten = true;
+        console.log(outer.wasWritten);
+      }
+    };
+  }
+}
+    `,
+    `
+class Outer {
+  private count = 0;
+
+  public getInner() {
+    const outer = this;
+
+    return class {
+      public increment() {
+        outer.count++;
+      }
+    };
+  }
+}
+    `,
   ],
   invalid: [
     {

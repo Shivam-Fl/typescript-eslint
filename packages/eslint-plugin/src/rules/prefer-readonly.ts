@@ -350,31 +350,29 @@ export default createRule<Options, MessageIds>({
         }
       },
       MemberExpression(node): void {
-        if (classScopeStack.length === 0) {
-          return;
-        }
-
-        const classScope = classScopeStack[classScopeStack.length - 1];
-
-        if (!node.computed) {
-          const tsNode = services.esTreeNodeToTSNodeMap.get(
-            node,
-          ) as ts.PropertyAccessExpression;
-          handlePropertyAccessExpression(tsNode, tsNode.parent, classScope);
-        } else {
-          const tsNode = services.esTreeNodeToTSNodeMap.get(node);
-          if (
-            ts.isElementAccessExpression(tsNode) &&
-            ts.isBinaryExpression(tsNode.parent) &&
-            tsNode.parent.left === tsNode &&
-            tsutils.isAssignmentKind(tsNode.parent.operatorToken.kind)
-          ) {
-            const memberName = getStaticMemberAccessValue(node, context);
-            if (typeof memberName === 'string') {
-              classScope.addVariableModificationByName(
-                tsNode.expression,
-                memberName,
-              );
+        // a modification may target an enclosing class through an alias,
+        // so every class scope on the stack gets to check the access
+        for (const classScope of classScopeStack) {
+          if (!node.computed) {
+            const tsNode = services.esTreeNodeToTSNodeMap.get(
+              node,
+            ) as ts.PropertyAccessExpression;
+            handlePropertyAccessExpression(tsNode, tsNode.parent, classScope);
+          } else {
+            const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+            if (
+              ts.isElementAccessExpression(tsNode) &&
+              ts.isBinaryExpression(tsNode.parent) &&
+              tsNode.parent.left === tsNode &&
+              tsutils.isAssignmentKind(tsNode.parent.operatorToken.kind)
+            ) {
+              const memberName = getStaticMemberAccessValue(node, context);
+              if (typeof memberName === 'string') {
+                classScope.addVariableModificationByName(
+                  tsNode.expression,
+                  memberName,
+                );
+              }
             }
           }
         }
