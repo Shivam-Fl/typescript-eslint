@@ -1,7 +1,11 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
-import { isOpeningBracketToken } from '@typescript-eslint/utils/ast-utils';
+import {
+  isClosingParenToken,
+  isOpeningBracketToken,
+  isOpeningParenToken,
+} from '@typescript-eslint/utils/ast-utils';
 
 import {
   createRule,
@@ -34,6 +38,17 @@ export default createRule({
     const services = getParserServices(context);
     const checker = services.program.getTypeChecker();
 
+    function isParenthesized(node: TSESTree.Node): boolean {
+      const before = sourceCode.getTokenBefore(node);
+      const after = sourceCode.getTokenAfter(node);
+      return (
+        before != null &&
+        after != null &&
+        isOpeningParenToken(before) &&
+        isClosingParenToken(after)
+      );
+    }
+
     return {
       'MemberExpression[computed=true][optional=false]'(
         node: TSESTree.MemberExpressionComputedName,
@@ -44,6 +59,7 @@ export default createRule({
           property.operator !== '-' ||
           property.left.type !== AST_NODE_TYPES.MemberExpression ||
           property.left.computed ||
+          property.left.property.type !== AST_NODE_TYPES.Identifier ||
           property.left.property.name !== 'length' ||
           property.right.type !== AST_NODE_TYPES.Literal ||
           typeof property.right.value !== 'number' ||
@@ -51,7 +67,8 @@ export default createRule({
           property.right.value < 1 ||
           !isNodeEqual(node.object, property.left.object) ||
           isAssignee(node) ||
-          isCalledOrTagged(node)
+          isCalledOrTagged(node) ||
+          isParenthesized(property.left)
         ) {
           return;
         }

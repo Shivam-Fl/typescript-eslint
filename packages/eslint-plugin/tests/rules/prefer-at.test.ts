@@ -77,6 +77,14 @@ declare const array: (() => void)[];
 array[array.length - 1]();
     `,
     `
+declare const array: string[];
+array[(array.length) - 1];
+    `,
+    `
+declare const array: ((strings: TemplateStringsArray) => void)[];
+array[array.length - 1]\`\`;
+    `,
+    `
 declare const object: { a: { b: string[] } };
 object.a.b[object.a.length - 1];
     `,
@@ -97,7 +105,7 @@ array[array.length - 1];
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: string[];
-array.at(- 1);
+array.at( - 1);
       `,
             },
           ],
@@ -119,7 +127,7 @@ array[array.length - 2];
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: readonly string[];
-array.at(- 2);
+array.at( - 2);
       `,
             },
           ],
@@ -141,7 +149,7 @@ array[array.length - 1];
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: string[] | number[];
-array.at(- 1);
+array.at( - 1);
       `,
             },
           ],
@@ -163,7 +171,7 @@ object.items[object.items.length - 1];
               messageId: 'preferAtSuggestion',
               output: `
 declare const object: { items: string[] };
-object.items.at(- 1);
+object.items.at( - 1);
       `,
             },
           ],
@@ -185,7 +193,7 @@ const last = array[array.length - 1];
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: string[];
-const last = array.at(- 1);
+const last = array.at( - 1);
       `,
             },
           ],
@@ -207,7 +215,7 @@ declare const array: string[];
               messageId: 'preferAtSuggestion',
               output: `
 declare const array: string[];
-(array).at(- 1);
+(array).at( - 1);
       `,
             },
           ],
