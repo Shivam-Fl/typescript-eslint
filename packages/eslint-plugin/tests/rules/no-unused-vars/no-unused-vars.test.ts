@@ -3605,16 +3605,16 @@ export const bar = 1;
     {
       code: `
 function f() {
-  /* a */ const foo: number; /* b */
+  /* a */ let foo: number; /* b */
   return 1;
 }
 f();
       `,
       errors: [
         {
-          column: 17,
+          column: 15,
           data: { action: 'defined', additional: '', varName: 'foo' },
-          endColumn: 20,
+          endColumn: 18,
           endLine: 3,
           line: 3,
           messageId: 'unusedVar',
