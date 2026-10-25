@@ -116,6 +116,26 @@ foo\`\${1 as any}\`;
 declare function foo(...args: any): void;
 foo(1 as any);
     `,
+    `
+declare const fromLib: { foo: number };
+declare function fn(x: { foo: number }): string;
+fn(fromLib);
+    `,
+    `
+declare const fromLib: { foo: any };
+declare function fn(x: { foo: unknown }): string;
+fn(fromLib);
+    `,
+    `
+declare const fromLib: { foo: any };
+declare function fn(x: { foo: any }): string;
+fn(fromLib);
+    `,
+    `
+declare const fromLib: { foo: any };
+declare function fn(x: { bar: number }): string;
+fn(fromLib);
+    `,
   ],
   invalid: [
     {
@@ -538,6 +558,38 @@ foo\`\${arg}\`;
           endColumn: 10,
           endLine: 5,
           line: 5,
+          messageId: 'unsafeArgument',
+        },
+      ],
+    },
+    {
+      code: `
+declare const fromLib: { foo: any };
+declare function fn(x: { foo: number }): string;
+fn(fromLib);
+      `,
+      errors: [
+        {
+          data: {
+            receiver: '`{ foo: number; }`',
+            sender: '`{ foo: any; }`',
+          },
+          messageId: 'unsafeArgument',
+        },
+      ],
+    },
+    {
+      code: `
+declare const fromLib: { foo: { bar: any } };
+declare function fn(x: { foo: { bar: string } }): string;
+fn(fromLib);
+      `,
+      errors: [
+        {
+          data: {
+            receiver: '`{ foo: { bar: string; }; }`',
+            sender: '`{ foo: { bar: any; }; }`',
+          },
           messageId: 'unsafeArgument',
         },
       ],

@@ -170,6 +170,7 @@ export default createRule<[], MessageIds>({
               parameterType,
               checker,
               argument,
+              true,
             );
             if (result) {
               context.report({
