@@ -17,6 +17,7 @@ import {
 } from '../util';
 import { analyzeChain } from './prefer-optional-chain-utils/analyzeChain';
 import { checkNullishAndReport } from './prefer-optional-chain-utils/checkNullishAndReport';
+import { checkTernary } from './prefer-optional-chain-utils/checkTernary';
 import {
   gatherLogicalOperands,
   OperandValidity,
@@ -110,6 +111,10 @@ export default createRule<
     const seenLogicals = new Set<TSESTree.LogicalExpression>();
 
     return {
+      ConditionalExpression(node: TSESTree.ConditionalExpression): void {
+        checkTernary(context, parserServices, options, node);
+      },
+
       'LogicalExpression[operator!="??"]'(
         node: TSESTree.LogicalExpression,
       ): void {

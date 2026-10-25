@@ -14,6 +14,7 @@ Because the optional chain operator _only_ chains when the property value is `nu
 It is also often less code to use `?.` optional chaining than `&&` truthiness checks.
 
 This rule reports on code where an `&&` operator can be safely replaced with `?.` optional chaining.
+It also reports ternary expressions that check a value for `null` and `undefined` and otherwise access a property or call a method on it.
 
 ## Examples
 
@@ -36,6 +37,11 @@ foo && foo.a && foo.a.b && foo.a.b.method && foo.a.b.method();
 
 // this rule also supports converting chained strict nullish checks:
 foo.a !== null && foo.a !== undefined && foo.a.b;
+
+// and simple ternaries that return `undefined` for nullish values:
+foo == null ? undefined : foo.a;
+foo != null ? foo.a : undefined;
+foo === null || foo === undefined ? undefined : foo.a;
 ```
 
 </TabItem>
@@ -53,6 +59,8 @@ foo?.a?.b?.c?.d?.e;
 !foo?.bar?.baz?.();
 
 foo?.a != null;
+
+foo?.a;
 ```
 
 </TabItem>
