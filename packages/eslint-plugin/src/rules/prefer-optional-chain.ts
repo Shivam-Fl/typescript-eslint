@@ -189,15 +189,15 @@ export default createRule<
           node,
           messageId: 'preferOptionalChain',
           fix:
-            hasCommentsToKeep || separator?.value === ')'
+            hasCommentsToKeep || !separator || separator.value === ')'
               ? null
               : (fixer): RuleFix => {
-                  const isDot = separator?.value === '.';
+                  const isDot = separator.value === '.';
                   const statementText = sourceCode.text.slice(
                     statement.range[0],
                     statement.range[1],
                   );
-                  const offset = separator!.range[0] - statement.range[0];
+                  const offset = separator.range[0] - statement.range[0];
                   return fixer.replaceText(
                     node,
                     `${statementText.slice(0, offset)}?.${statementText.slice(
