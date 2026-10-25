@@ -2034,6 +2034,15 @@ var b;
           endLine: 3,
           line: 3,
           messageId: 'unusedVar',
+          suggestions: [
+            {
+              data: { varName: 'b' },
+              messageId: 'removeUnusedVar',
+              output: `
+var _a;
+      `,
+            },
+          ],
         },
       ],
       options: [{ vars: 'all', varsIgnorePattern: '^_' }],
@@ -2059,6 +2068,19 @@ foo();
           endLine: 5,
           line: 5,
           messageId: 'unusedVar',
+          suggestions: [
+            {
+              data: { varName: 'c_' },
+              messageId: 'removeUnusedVar',
+              output: `
+var a;
+function foo() {
+  var _b;
+}
+foo();
+      `,
+            },
+          ],
         },
       ],
       options: [{ vars: 'local', varsIgnorePattern: '^_' }],
@@ -4007,6 +4029,18 @@ class Foo {
           endColumn: 12,
           endLine: 4,
           line: 4,
+          suggestions: [
+            {
+              data: { varName: 'bar' },
+              messageId: 'removeUnusedVar',
+              output: `
+class Foo {
+  static {
+  }
+}
+      `,
+            },
+          ],
         },
       ],
       languageOptions: { parserOptions: { ecmaVersion: 2022 } },

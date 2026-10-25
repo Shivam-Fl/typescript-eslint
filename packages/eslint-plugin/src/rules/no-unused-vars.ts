@@ -2,6 +2,7 @@ import type {
   Definition,
   ImportBindingDefinition,
   ScopeVariable,
+  VariableDefinition,
 } from '@typescript-eslint/scope-manager';
 import type { TSESTree } from '@typescript-eslint/utils';
 
@@ -418,8 +419,10 @@ export default createRule<Options, MessageIds>({
               return {};
 
             case VariableType.Variable:
-              // TODO(bradzacher) -- this would be really easy to implement
-              return {};
+              // Only offered as a suggestion, and only for the case that is
+              // always side-effect free: a lone declarator with no initializer
+              // that nothing reads or writes.
+              return getVariableFixer(def, unusedVar) ?? {};
           }
         })();
 
@@ -548,6 +551,37 @@ export default createRule<Options, MessageIds>({
         return fixer.removeRange([lineRangeStart, lineRangeEnd]);
       }
       return fixer.remove(node);
+    }
+
+    function getVariableFixer(
+      def: VariableDefinition,
+      unusedVar: ScopeVariable,
+    ): { fix: TSESLint.ReportFixFunction; messageId: MessageIds } | undefined {
+      const declarator = def.node;
+      const declaration = def.parent;
+      if (
+        declarator.init != null ||
+        unusedVar.references.length > 0 ||
+        declaration.declarations.length !== 1 ||
+        declaration.declare ||
+        isDefinitionFile(context.filename)
+      ) {
+        return undefined;
+      }
+
+      switch (declaration.parent.type) {
+        case AST_NODE_TYPES.BlockStatement:
+        case AST_NODE_TYPES.Program:
+        case AST_NODE_TYPES.StaticBlock:
+          return {
+            messageId: 'removeUnusedVar',
+            fix: fixer => removeNodeWithTrailingNewline(fixer, declaration),
+          };
+
+        default:
+          // e.g. a for loop head, a labelled statement, or an ambient module
+          return undefined;
+      }
     }
 
     function getImportFixer(def: ImportBindingDefinition): {

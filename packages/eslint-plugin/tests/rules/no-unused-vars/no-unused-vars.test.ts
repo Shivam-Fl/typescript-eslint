@@ -3577,5 +3577,136 @@ export function g(a: string, b: unknown, c: string) {
       ],
       options: [{ args: 'after-used' }],
     },
+    {
+      code: `
+let foo: number;
+export const bar = 1;
+      `,
+      errors: [
+        {
+          column: 5,
+          data: { action: 'defined', additional: '', varName: 'foo' },
+          endColumn: 8,
+          endLine: 2,
+          line: 2,
+          messageId: 'unusedVar',
+          suggestions: [
+            {
+              data: { varName: 'foo' },
+              messageId: 'removeUnusedVar',
+              output: `
+export const bar = 1;
+      `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      code: `
+function f() {
+  /* a */ let foo: number; /* b */
+  return 1;
+}
+f();
+      `,
+      errors: [
+        {
+          column: 15,
+          data: { action: 'defined', additional: '', varName: 'foo' },
+          endColumn: 18,
+          endLine: 3,
+          line: 3,
+          messageId: 'unusedVar',
+          suggestions: [
+            {
+              data: { varName: 'foo' },
+              messageId: 'removeUnusedVar',
+              output: `
+function f() {
+  /* a */  /* b */
+  return 1;
+}
+f();
+      `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      code: `
+function f() {
+  const foo = sideEffect();
+}
+f();
+      `,
+      errors: [
+        {
+          column: 9,
+          data: { action: 'assigned a value', additional: '', varName: 'foo' },
+          endColumn: 12,
+          endLine: 3,
+          line: 3,
+          messageId: 'unusedVar',
+          suggestions: [],
+        },
+      ],
+    },
+    {
+      code: `
+function f() {
+  let foo, bar;
+  return bar;
+}
+f();
+      `,
+      errors: [
+        {
+          column: 7,
+          data: { action: 'defined', additional: '', varName: 'foo' },
+          endColumn: 10,
+          endLine: 3,
+          line: 3,
+          messageId: 'unusedVar',
+          suggestions: [],
+        },
+      ],
+    },
+    {
+      code: `
+declare const foo: number;
+      `,
+      errors: [
+        {
+          column: 15,
+          data: { action: 'defined', additional: '', varName: 'foo' },
+          endColumn: 18,
+          endLine: 2,
+          line: 2,
+          messageId: 'unusedVar',
+          suggestions: [],
+        },
+      ],
+    },
+    {
+      code: `
+function f(obj: object) {
+  if (obj) var foo: number;
+}
+f({});
+      `,
+      errors: [
+        {
+          column: 16,
+          data: { action: 'defined', additional: '', varName: 'foo' },
+          endColumn: 19,
+          endLine: 3,
+          line: 3,
+          messageId: 'unusedVar',
+          suggestions: [],
+        },
+      ],
+    },
   ],
 });
