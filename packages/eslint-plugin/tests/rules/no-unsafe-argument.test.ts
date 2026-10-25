@@ -136,6 +136,11 @@ declare const fromLib: { foo: any };
 declare function fn(x: { bar: number }): string;
 fn(fromLib);
     `,
+    `
+declare const value: any;
+declare function fn(x: { foo: number }): string;
+fn({ foo: value });
+    `,
   ],
   invalid: [
     {
@@ -570,10 +575,14 @@ fn(fromLib);
       `,
       errors: [
         {
+          column: 4,
           data: {
             receiver: '`{ foo: number; }`',
             sender: '`{ foo: any; }`',
           },
+          endColumn: 11,
+          endLine: 4,
+          line: 4,
           messageId: 'unsafeArgument',
         },
       ],
@@ -586,10 +595,14 @@ fn(fromLib);
       `,
       errors: [
         {
+          column: 4,
           data: {
             receiver: '`{ foo: { bar: string; }; }`',
             sender: '`{ foo: { bar: any; }; }`',
           },
+          endColumn: 11,
+          endLine: 4,
+          line: 4,
           messageId: 'unsafeArgument',
         },
       ],

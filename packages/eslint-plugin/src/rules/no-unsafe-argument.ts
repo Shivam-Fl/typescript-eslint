@@ -170,7 +170,8 @@ export default createRule<[], MessageIds>({
               parameterType,
               checker,
               argument,
-              true,
+              // object literals are excluded: their properties are written in place
+              argument.type !== AST_NODE_TYPES.ObjectExpression,
             );
             if (result) {
               context.report({

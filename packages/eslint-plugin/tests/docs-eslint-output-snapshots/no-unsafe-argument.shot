@@ -31,6 +31,11 @@ baz(new Set<any>(), new Map<any, string>());
     ~~~~~~~~~~~~~~ Unsafe argument of type `Set<any>` assigned to a parameter of type `Set<string>`.
                     ~~~~~~~~~~~~~~~~~~~~~~ Unsafe argument of type `Map<any, string>` assigned to a parameter of type `Map<string, string>`.
 
+declare function qux(arg: { foo: number }): void;
+declare const fromLib: { foo: any };
+qux(fromLib);
+    ~~~~~~~ Unsafe argument of type `{ foo: any; }` assigned to a parameter of type `{ foo: number; }`.
+
 Correct
 
 declare function foo(arg1: string, arg2: number, arg3: string): void;
@@ -46,6 +51,10 @@ bar('a', 1, ...array);
 
 declare function baz(arg1: Set<string>, arg2: Map<string, string>): void;
 baz(new Set<string>(), new Map<string, string>());
+
+declare function qux(arg: { foo: number }): void;
+declare const fromLib: { foo: number };
+qux(fromLib);
 
 
 
