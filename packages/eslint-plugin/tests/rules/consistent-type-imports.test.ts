@@ -2419,7 +2419,7 @@ export const value = Placeholder();
         errors: [
           {
             column: 1,
-            endColumn: 42,
+            endColumn: 43,
             endLine: 2,
             line: 2,
             messageId: 'typeOverValue',
@@ -2448,7 +2448,7 @@ export function Main() {
         errors: [
           {
             column: 1,
-            endColumn: 42,
+            endColumn: 43,
             endLine: 2,
             line: 2,
             messageId: 'typeOverValue',
