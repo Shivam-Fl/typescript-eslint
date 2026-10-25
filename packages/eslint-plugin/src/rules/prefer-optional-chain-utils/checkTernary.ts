@@ -176,65 +176,8 @@ export function checkTernary(
 
   const { sourceCode } = context;
 
-  const fix: ReportFixFunction = fixer => {
-    const tokenAfterChecked = sourceCode.getTokenAfter(checkedInChain)!;
-    if (!['.', '(', '<', '[', '?.'].includes(tokenAfterChecked.value)) {
-      // e.g. the checked expression is wrapped in parentheses
-      return null;
-    }
-
-    const firstToken = sourceCode.getFirstToken(node)!;
-    const colon = sourceCode.getFirstTokenBetween(
-      node.consequent,
-      node.alternate,
-      isColonToken,
-    )!;
-
-    // the ranges are the ternary syntax around the chain, which is removed
-    const removedRanges: TSESTree.Range[] = [];
-    if (isNullishTest) {
-      // `foo == null ? undefined : ` before the chain
-      const chainStart = sourceCode.getTokenAfter(colon)!;
-      if (sourceCode.commentsExistBetween(firstToken, chainStart)) {
-        return null;
-      }
-      removedRanges.push([firstToken.range[0], chainStart.range[0]]);
-    } else {
-      // `foo != null ? ` before the chain and ` : undefined` after it
-      const question = sourceCode.getFirstTokenBetween(
-        node.test,
-        node.consequent,
-        isQuestionToken,
-      )!;
-      const chainStart = sourceCode.getTokenAfter(question)!;
-      const chainEnd = sourceCode.getTokenBefore(colon)!;
-      if (
-        sourceCode.commentsExistBetween(firstToken, chainStart) ||
-        sourceCode.commentsExistBetween(
-          chainEnd,
-          sourceCode.getLastToken(node)!,
-        )
-      ) {
-        return null;
-      }
-      removedRanges.push(
-        [firstToken.range[0], chainStart.range[0]],
-        [chainEnd.range[1], node.range[1]],
-      );
-    }
-
-    const fixes = removedRanges.map(range => fixer.removeRange(range));
-    if (tokenAfterChecked.value === '.') {
-      fixes.push(fixer.replaceText(tokenAfterChecked, '?.'));
-    } else if (tokenAfterChecked.value !== '?.') {
-      fixes.push(fixer.insertTextBefore(tokenAfterChecked, '?.'));
-    }
-    return fixes;
-  };
-
   checkNullishAndReport(context, parserServices, options, [checked], {
     node,
-    fix,
     messageId: 'preferOptionalChain',
   });
 }
