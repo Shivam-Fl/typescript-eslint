@@ -2,6 +2,7 @@ import type {
   Definition,
   ImportBindingDefinition,
   ScopeVariable,
+  VariableDefinition,
 } from '@typescript-eslint/scope-manager';
 import type { TSESTree } from '@typescript-eslint/utils';
 
@@ -183,6 +184,45 @@ function assertToken(
     );
   }
   return token;
+}
+
+function isSideEffectFree(node: TSESTree.Node | null): boolean {
+  if (node == null) {
+    return true;
+  }
+
+  switch (node.type) {
+    case AST_NODE_TYPES.ArrayExpression:
+      return node.elements.every(
+        element => element == null || isSideEffectFree(element),
+      );
+
+    case AST_NODE_TYPES.ArrowFunctionExpression:
+    case AST_NODE_TYPES.FunctionExpression:
+    case AST_NODE_TYPES.Identifier:
+    case AST_NODE_TYPES.Literal:
+      return true;
+
+    case AST_NODE_TYPES.ObjectExpression:
+      return node.properties.every(
+        property =>
+          property.type === AST_NODE_TYPES.Property &&
+          !property.computed &&
+          isSideEffectFree(property.value),
+      );
+
+    case AST_NODE_TYPES.TemplateLiteral:
+      return node.expressions.length === 0;
+
+    case AST_NODE_TYPES.TSAsExpression:
+    case AST_NODE_TYPES.TSNonNullExpression:
+    case AST_NODE_TYPES.TSSatisfiesExpression:
+    case AST_NODE_TYPES.TSTypeAssertion:
+      return isSideEffectFree(node.expression);
+
+    default:
+      return false;
+  }
 }
 
 export default createRule<Options, MessageIds>({
@@ -418,8 +458,10 @@ export default createRule<Options, MessageIds>({
               return {};
 
             case VariableType.Variable:
-              // TODO(bradzacher) -- this would be really easy to implement
-              return {};
+              // Only offered as a suggestion, and only for the case that is
+              // always side-effect free: a lone declarator with no initializer
+              // that nothing reads or writes.
+              return getVariableFixer(def, unusedVar) ?? {};
           }
         })();
 
@@ -548,6 +590,99 @@ export default createRule<Options, MessageIds>({
         return fixer.removeRange([lineRangeStart, lineRangeEnd]);
       }
       return fixer.remove(node);
+    }
+
+    function getVariableFixer(
+      def: VariableDefinition,
+      unusedVar: ScopeVariable,
+    ): { fix: TSESLint.ReportFixFunction; messageId: MessageIds } | undefined {
+      const declarator = def.node;
+      const declaration = def.parent;
+      if (
+        declarator.init != null ||
+        unusedVar.references.length > 0 ||
+        declaration.declarations.length !== 1 ||
+        declaration.declare ||
+        isDefinitionFile(context.filename)
+      ) {
+        return undefined;
+      }
+
+      switch (declaration.parent.type) {
+        case AST_NODE_TYPES.BlockStatement:
+        case AST_NODE_TYPES.Program:
+        case AST_NODE_TYPES.StaticBlock:
+          return {
+            messageId: 'removeUnusedVar',
+            fix: fixer => removeNodeWithTrailingNewline(fixer, declaration),
+          };
+
+        default:
+          // e.g. a for loop head, a labelled statement, or an ambient module
+          return undefined;
+      }
+    }
+
+    function getVariableFixer(
+      unusedVar: ScopeVariable,
+      def: Definition & { type: DefinitionType.Variable },
+    ): {
+      fix?: TSESLint.ReportFixFunction;
+    } {
+      const declarator = def.node;
+      const declaration = declarator.parent;
+      if (
+        // destructuring patterns would need to be unpicked
+        declarator.id !== def.name ||
+        // `using` disposal is itself a side effect
+        (declaration.kind !== 'const' &&
+          declaration.kind !== 'let' &&
+          declaration.kind !== 'var') ||
+        // any other reference would be left dangling
+        unusedVar.references.some(ref => ref.identifier !== def.name) ||
+        !isSideEffectFree(declarator.init) ||
+        context.sourceCode.getCommentsInside(declaration).length > 0
+      ) {
+        return {};
+      }
+
+      if (declaration.declarations.length === 1) {
+        switch (declaration.parent.type) {
+          case AST_NODE_TYPES.BlockStatement:
+          case AST_NODE_TYPES.Program:
+          case AST_NODE_TYPES.StaticBlock:
+          case AST_NODE_TYPES.SwitchCase:
+          case AST_NODE_TYPES.TSModuleBlock:
+            return {
+              fix: fixer => removeNodeWithTrailingNewline(fixer, declaration),
+            };
+
+          default:
+            // loop heads and bodiless statements need the declaration to stay
+            return {};
+        }
+      }
+
+      if (
+        declaration.parent.type === AST_NODE_TYPES.ForStatement ||
+        declaration.parent.type === AST_NODE_TYPES.ForInStatement ||
+        declaration.parent.type === AST_NODE_TYPES.ForOfStatement
+      ) {
+        return {};
+      }
+
+      // remove the declarator and one adjacent comma, leaving other tokens
+      // (and any comments between them) untouched
+      const isFirst = declaration.declarations[0] === declarator;
+      const comma = assertToken(
+        isCommaToken,
+        isFirst
+          ? context.sourceCode.getTokenAfter(declarator)
+          : context.sourceCode.getTokenBefore(declarator),
+      );
+      return {
+        fix: fixer => [fixer.remove(comma), fixer.remove(declarator)],
+      };
     }
 
     function getImportFixer(def: ImportBindingDefinition): {
