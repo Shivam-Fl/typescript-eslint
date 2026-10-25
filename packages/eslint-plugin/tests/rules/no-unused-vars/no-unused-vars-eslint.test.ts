@@ -2185,16 +2185,6 @@ const newArray = [a, c];
           endColumn: 15,
           endLine: 4,
           line: 4,
-          suggestions: [
-            {
-              data: { varName: 'newArray' },
-              messageId: 'removeUnusedVar',
-              output: `
-const array = ['a', 'b', 'c'];
-const [a, _b, c] = array;
-      `,
-            },
-          ],
         },
       ],
       languageOptions: { parserOptions: { ecmaVersion: 2020 } },
@@ -2270,18 +2260,6 @@ const ignoreArray = ['ignore'];
           endColumn: 15,
           endLine: 4,
           line: 4,
-          suggestions: [
-            {
-              data: { varName: 'fooArray' },
-              messageId: 'removeUnusedVar',
-              output: `
-const array = ['a', 'b', 'c'];
-const [a, _b, c] = array;
-const barArray = ['bar'];
-const ignoreArray = ['ignore'];
-      `,
-            },
-          ],
         },
         {
           ...assignedError(
@@ -2292,18 +2270,6 @@ const ignoreArray = ['ignore'];
           endColumn: 15,
           endLine: 5,
           line: 5,
-          suggestions: [
-            {
-              data: { varName: 'barArray' },
-              messageId: 'removeUnusedVar',
-              output: `
-const array = ['a', 'b', 'c'];
-const [a, _b, c] = array;
-const fooArray = ['foo'];
-const ignoreArray = ['ignore'];
-      `,
-            },
-          ],
         },
       ],
       languageOptions: { parserOptions: { ecmaVersion: 2020 } },
@@ -2364,19 +2330,6 @@ foo.forEach(item => {
           endColumn: 7,
           endLine: 2,
           line: 2,
-          suggestions: [
-            {
-              data: { varName: '_a' },
-              messageId: 'removeUnusedVar',
-              output: `
-let  b;
-
-foo.forEach(item => {
-  [a, b] = item;
-});
-      `,
-            },
-          ],
         },
         {
           ...assignedError('b'),
