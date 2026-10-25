@@ -1,0 +1,19 @@
+Incorrect
+
+declare const array: string[];
+
+array[array.length - 1];
+~~~~~~~~~~~~~~~~~~~~~~~ Use `.at(-1)` instead of indexing with `.length`.
+array[array.length - 2];
+~~~~~~~~~~~~~~~~~~~~~~~ Use `.at(-2)` instead of indexing with `.length`.
+
+Correct
+
+declare const array: string[];
+
+array.at(-1);
+array.at(-2);
+array[0];
+
+declare const getArray: () => string[];
+getArray()[getArray().length - 1];

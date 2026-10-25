@@ -140,6 +140,7 @@ export default (
       '@typescript-eslint/only-throw-error': 'error',
       '@typescript-eslint/parameter-properties': 'error',
       '@typescript-eslint/prefer-as-const': 'error',
+      '@typescript-eslint/prefer-at': 'error',
       'prefer-destructuring': 'off',
       '@typescript-eslint/prefer-destructuring': 'error',
       '@typescript-eslint/prefer-enum-initializers': 'error',
