@@ -984,9 +984,66 @@ enum E {
 }
 const x: E | undefined = o?.fn(n => n | 0, 0 as E);
     `,
+    `
+enum Color {
+  Red,
+  Green,
+  Blue,
+}
+declare const valueStr: string;
+const color = +valueStr as Color;
+    `,
+    `
+enum Color {
+  Red,
+  Green,
+  Blue,
+}
+declare const values: Record<Color, string>;
+declare const valueStr: string;
+values[+valueStr as Color] = 'updated';
+    `,
+    `
+enum Color {
+  Red,
+  Green,
+  Blue,
+}
+declare const n: number;
+const color = n as Color;
+    `,
   ],
 
   invalid: [
+    {
+      code: `
+enum Color {
+  Red,
+  Green,
+  Blue,
+}
+declare const color: Color;
+const other = color as Color;
+      `,
+      errors: [
+        {
+          column: 15,
+          endColumn: 29,
+          endLine: 8,
+          line: 8,
+          messageId: 'unnecessaryAssertion',
+        },
+      ],
+      output: `
+enum Color {
+  Red,
+  Green,
+  Blue,
+}
+declare const color: Color;
+const other = color;
+      `,
+    },
     {
       code: 'const foo = <3>3;',
       errors: [

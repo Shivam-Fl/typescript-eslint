@@ -273,6 +273,14 @@ export default createRule<Options, MessageIds>({
         return false;
       }
 
+      // number and numeric enums are mutually assignable, but asserting one as the other changes the type
+      if (
+        isTypeFlagSet(uncast, ts.TypeFlags.EnumLike) !==
+        isTypeFlagSet(cast, ts.TypeFlags.EnumLike)
+      ) {
+        return false;
+      }
+
       if (
         !hasSameProperties(uncast, cast) ||
         !haveSameTypeArguments(uncast, cast)
