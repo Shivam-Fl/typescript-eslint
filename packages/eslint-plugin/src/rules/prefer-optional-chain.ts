@@ -1,7 +1,10 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 import type { RuleFix } from '@typescript-eslint/utils/ts-eslint';
 
+import { isTypeFlagSet } from '@typescript-eslint/type-utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { unionConstituents } from 'ts-api-utils';
+import * as ts from 'typescript';
 
 import type { ValidOperand } from './prefer-optional-chain-utils/gatherLogicalOperands';
 import type {
@@ -17,6 +20,10 @@ import {
 } from '../util';
 import { analyzeChain } from './prefer-optional-chain-utils/analyzeChain';
 import { checkNullishAndReport } from './prefer-optional-chain-utils/checkNullishAndReport';
+import {
+  compareNodes,
+  NodeComparisonResult,
+} from './prefer-optional-chain-utils/compareNodes';
 import {
   gatherLogicalOperands,
   OperandValidity,
@@ -109,7 +116,97 @@ export default createRule<
 
     const seenLogicals = new Set<TSESTree.LogicalExpression>();
 
+    function isNullishOrObjectType(node: TSESTree.Expression): boolean {
+      const constituents = unionConstituents(
+        parserServices.getTypeAtLocation(node),
+      );
+      return (
+        constituents.some(t =>
+          isTypeFlagSet(t, ts.TypeFlags.Null | ts.TypeFlags.Undefined),
+        ) &&
+        constituents.every(t =>
+          isTypeFlagSet(
+            t,
+            ts.TypeFlags.Null |
+              ts.TypeFlags.Undefined |
+              ts.TypeFlags.Object |
+              ts.TypeFlags.NonPrimitive,
+          ),
+        )
+      );
+    }
+
     return {
+      // `if (foo) foo.bar();` / `if (foo) { foo(); }`
+      IfStatement(node: TSESTree.IfStatement): void {
+        const { test } = node;
+        if (
+          node.alternate ||
+          (test.type !== AST_NODE_TYPES.Identifier &&
+            (test.type !== AST_NODE_TYPES.MemberExpression || test.optional))
+        ) {
+          return;
+        }
+
+        const statement =
+          node.consequent.type === AST_NODE_TYPES.BlockStatement &&
+          node.consequent.body.length === 1
+            ? node.consequent.body[0]
+            : node.consequent;
+        if (
+          statement.type !== AST_NODE_TYPES.ExpressionStatement ||
+          statement.expression.type !== AST_NODE_TYPES.CallExpression ||
+          statement.expression.optional
+        ) {
+          return;
+        }
+
+        const { callee } = statement.expression;
+        const guarded =
+          callee.type === AST_NODE_TYPES.MemberExpression && !callee.optional
+            ? callee.object
+            : callee;
+        if (compareNodes(test, guarded) !== NodeComparisonResult.Equal) {
+          return;
+        }
+
+        if (!isNullishOrObjectType(test)) {
+          return;
+        }
+
+        const { sourceCode } = context;
+        const hasCommentsToKeep = sourceCode
+          .getCommentsInside(node)
+          .some(
+            comment =>
+              comment.range[0] < statement.range[0] ||
+              comment.range[1] > statement.range[1],
+          );
+        // the comments inside the statement are kept by the fix
+        const separator = sourceCode.getTokenAfter(guarded);
+        context.report({
+          node,
+          messageId: 'preferOptionalChain',
+          fix:
+            hasCommentsToKeep || !separator
+              ? null
+              : (fixer): RuleFix => {
+                  const isDot = separator.value === '.';
+                  const statementText = sourceCode.text.slice(
+                    statement.range[0],
+                    statement.range[1],
+                  );
+                  const offset = separator.range[0] - statement.range[0];
+                  return fixer.replaceText(
+                    node,
+                    `${statementText.slice(0, offset)}?.${statementText.slice(
+                      offset + (isDot ? 1 : 0),
+                    )}`,
+                  );
+                },
+        });
+      },
+
       'LogicalExpression[operator!="??"]'(
         node: TSESTree.LogicalExpression,
       ): void {
