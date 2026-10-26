@@ -1,0 +1,84 @@
+ScopeManager {
+  variables: [
+    ImplicitGlobalConstTypeVariable,
+    Variable$2 {
+      defs: [
+        ImportBindingDefinition$1 {
+          name: Identifier<"T">,
+          node: ImportNamespaceSpecifier$1,
+        },
+      ],
+      name: "T",
+      references: [
+        Reference$1 {
+          identifier: Identifier<"T">,
+          isRead: true,
+          isTypeReference: true,
+          isValueReference: false,
+          isWrite: false,
+          resolved: Variable$2,
+        },
+      ],
+      isValueVariable: true,
+      isTypeVariable: true,
+    },
+    Variable$3 {
+      defs: [
+        TypeDefinition$2 {
+          name: Identifier<"Foo">,
+          node: TSInterfaceDeclaration$2,
+        },
+      ],
+      name: "Foo",
+      references: [],
+      isValueVariable: false,
+      isTypeVariable: true,
+    },
+    Variable$4 {
+      defs: [
+        TypeDefinition$3 {
+          name: Identifier<"T">,
+          node: TSTypeParameter$3,
+        },
+      ],
+      name: "T",
+      references: [],
+      isValueVariable: false,
+      isTypeVariable: true,
+    },
+  ],
+  scopes: [
+    GlobalScope$1 {
+      block: Program$4,
+      isStrict: false,
+      references: [],
+      set: Map {
+        "const" => ImplicitGlobalConstTypeVariable,
+        "T" => Variable$2,
+        "Foo" => Variable$3,
+      },
+      type: "global",
+      upper: null,
+      variables: [
+        ImplicitGlobalConstTypeVariable,
+        Variable$2,
+        Variable$3,
+      ],
+    },
+    TypeScope$2 {
+      block: TSInterfaceDeclaration$2,
+      isStrict: true,
+      references: [
+        Reference$1,
+      ],
+      set: Map {
+        "T" => Variable$4,
+      },
+      type: "type",
+      upper: GlobalScope$1,
+      variables: [
+        Variable$4,
+      ],
+    },
+  ],
+}
