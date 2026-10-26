@@ -20,6 +20,7 @@ import {
 } from '../util';
 import { analyzeChain } from './prefer-optional-chain-utils/analyzeChain';
 import { checkNullishAndReport } from './prefer-optional-chain-utils/checkNullishAndReport';
+import { checkTernary } from './prefer-optional-chain-utils/checkTernary';
 import {
   compareNodes,
   NodeComparisonResult,
@@ -137,6 +138,10 @@ export default createRule<
     }
 
     return {
+      ConditionalExpression(node: TSESTree.ConditionalExpression): void {
+        checkTernary(context, parserServices, options, node);
+      },
+
       // `if (foo) foo.bar();` / `if (foo) { foo(); }`
       IfStatement(node: TSESTree.IfStatement): void {
         const { test } = node;

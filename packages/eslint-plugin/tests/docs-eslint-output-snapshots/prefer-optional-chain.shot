@@ -29,6 +29,14 @@ foo && foo.a && foo.a.b && foo.a.b.method && foo.a.b.method();
 foo.a !== null && foo.a !== undefined && foo.a.b;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
 
+// and simple ternaries that return `undefined` for nullish values:
+foo == null ? undefined : foo.a;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
+foo != null ? foo.a : undefined;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
+foo === null || foo === undefined ? undefined : foo.a;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
+
 // With `if` statements that only call a method or function
 declare const callback: (() => void) | undefined;
 if (callback) callback();
