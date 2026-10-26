@@ -1,7 +1,15 @@
-import * as tsutils from 'ts-api-utils';
-import * as ts from 'typescript';
+import type * as ts from 'typescript';
 
-/** Matches `CheckFlags.Readonly` from the TypeScript checker (not public API). */
+import * as tsutils from 'ts-api-utils';
+
+/**
+ * Matches `CheckFlags.Readonly` from the TypeScript checker (not public API).
+ *
+ * Verified against TypeScript 6.0.2, where it is read from
+ * `symbol.links.checkFlags`. The direct `symbol.checkFlags` fallback is for
+ * older versions and has not been verified against a specific release. If the
+ * property is missing, only ts-api-utils' result applies.
+ */
 const CHECK_FLAGS_READONLY = 1 << 3;
 
 /**
