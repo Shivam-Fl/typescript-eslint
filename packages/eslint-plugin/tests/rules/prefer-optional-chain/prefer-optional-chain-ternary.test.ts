@@ -1,3 +1,5 @@
+import { noFormat } from '@typescript-eslint/rule-tester';
+
 import rule from '../../../src/rules/prefer-optional-chain';
 import { createRuleTesterWithTypes } from '../../RuleTester';
 
@@ -170,7 +172,7 @@ foo?.bar<number>();
       `,
     },
     {
-      code: `
+      code: noFormat`
 declare const foo: { bar: number } | null | undefined;
 (foo) == null ? undefined : (foo).bar;
       `,
@@ -448,7 +450,7 @@ foo?.['bar'];
       `,
     },
     {
-      code: `
+      code: noFormat`
 declare const foo: { bar: number } | null | undefined;
 foo == null ? undefined : foo /* comment */ .bar;
       `,
@@ -462,14 +464,14 @@ foo == null ? undefined : foo /* comment */ .bar;
           suggestions: null,
         },
       ],
-      output: `
+      output: noFormat`
 declare const foo: { bar: number } | null | undefined;
 foo /* comment */ ?.bar;
       `,
     },
     {
       code: `
-declare const foo: { bar: { baz: number } | null | undefined } | null | undefined;
+declare const foo: { bar?: { baz: number } } | null;
 foo == null ? undefined : foo.bar?.baz;
       `,
       errors: [
@@ -483,7 +485,7 @@ foo == null ? undefined : foo.bar?.baz;
         },
       ],
       output: `
-declare const foo: { bar: { baz: number } | null | undefined } | null | undefined;
+declare const foo: { bar?: { baz: number } } | null;
 foo?.bar?.baz;
       `,
     },
