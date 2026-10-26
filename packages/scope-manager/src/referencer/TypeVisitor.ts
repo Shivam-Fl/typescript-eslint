@@ -219,7 +219,12 @@ export class TypeVisitor extends Visitor {
   }
 
   protected TSQualifiedName(node: TSESTree.TSQualifiedName): void {
-    this.visit(node.left);
+    if (node.left.type === AST_NODE_TYPES.Identifier) {
+      // the left side of a qualified name is a namespace, which a type parameter can't be
+      this.#referencer.currentScope().referenceValue(node.left);
+    } else {
+      this.visit(node.left);
+    }
     // we don't visit the right as it a name on the thing, not a name to reference
   }
 
