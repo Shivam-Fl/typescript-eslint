@@ -1027,6 +1027,27 @@ if (obj1.type === obj2.type) {
   invalid: [
     {
       code: `
+declare const base: { a: string };
+const spread = { ...base } as const;
+const asserted = spread as { readonly a: string };
+      `,
+      errors: [
+        {
+          column: 18,
+          endColumn: 50,
+          endLine: 4,
+          line: 4,
+          messageId: 'unnecessaryAssertion',
+        },
+      ],
+      output: `
+declare const base: { a: string };
+const spread = { ...base } as const;
+const asserted = spread;
+      `,
+    },
+    {
+      code: `
 enum Color {
   Red,
   Green,

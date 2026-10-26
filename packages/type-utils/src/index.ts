@@ -5,6 +5,7 @@ export * from './getContextualType';
 export * from './getDeclaration';
 export * from './getSourceFileOfNode';
 export * from './getTypeName';
+export * from './isPropertyReadonlyInType';
 export * from './isSymbolFromDefaultLibrary';
 export * from './isTypeBrandedLiteralLike';
 export * from './isTypeReadonly';
