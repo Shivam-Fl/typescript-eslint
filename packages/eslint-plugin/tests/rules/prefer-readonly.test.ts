@@ -9,6 +9,52 @@ ruleTester.run('prefer-readonly', rule, {
   },
   valid: [
     'function ignore() {}',
+    `
+class Outer {
+  private value = 0;
+
+  constructor() {
+    const outer = this;
+
+    class Inner {
+      public set() {
+        outer.value = 1;
+      }
+    }
+  }
+}
+    `,
+    `
+export class OuterClass {
+  private wasWritten = false;
+
+  public getInner() {
+    const outer = this;
+
+    return class {
+      public doSomething() {
+        outer.wasWritten = true;
+        console.log(outer.wasWritten);
+      }
+    };
+  }
+}
+    `,
+    `
+export class OuterClass {
+  private count = 0;
+
+  public getInner() {
+    const outer = this;
+
+    return class {
+      public doSomething() {
+        outer.count++;
+      }
+    };
+  }
+}
+    `,
     'const ignore = function () {};',
     'const ignore = () => {};',
     `
