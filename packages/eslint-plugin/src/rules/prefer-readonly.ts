@@ -216,9 +216,14 @@ export default createRule<Options, MessageIds>({
           | TSESTree.MethodDefinition,
       ): void {
         if (ASTUtils.isConstructor(node)) {
-          classScopeStack[classScopeStack.length - 1].exitConstructor();
+          classScopeStack.at(-1)?.exitConstructor();
+          for (const classScope of classScopeStack.slice(0, -1)) {
+            classScope.exitNonConstructor();
+          }
         } else if (isFunctionScopeBoundaryInStack(node)) {
-          classScopeStack[classScopeStack.length - 1].exitNonConstructor();
+          for (const classScope of classScopeStack) {
+            classScope.exitNonConstructor();
+          }
         }
       },
       'ClassDeclaration, ClassExpression'(
@@ -342,11 +347,16 @@ export default createRule<Options, MessageIds>({
           | TSESTree.MethodDefinition,
       ): void {
         if (ASTUtils.isConstructor(node)) {
-          classScopeStack[classScopeStack.length - 1].enterConstructor(
-            services.esTreeNodeToTSNodeMap.get(node),
-          );
+          classScopeStack
+            .at(-1)
+            ?.enterConstructor(services.esTreeNodeToTSNodeMap.get(node));
+          for (const classScope of classScopeStack.slice(0, -1)) {
+            classScope.enterNonConstructor();
+          }
         } else if (isFunctionScopeBoundaryInStack(node)) {
-          classScopeStack[classScopeStack.length - 1].enterNonConstructor();
+          for (const classScope of classScopeStack) {
+            classScope.enterNonConstructor();
+          }
         }
       },
       MemberExpression(node): void {
@@ -354,13 +364,15 @@ export default createRule<Options, MessageIds>({
           return;
         }
 
-        const classScope = classScopeStack[classScopeStack.length - 1];
-
+        // The receiver may be an instance of any enclosing class, e.g. an
+        // `outer = this` alias used inside a nested class.
         if (!node.computed) {
           const tsNode = services.esTreeNodeToTSNodeMap.get(
             node,
           ) as ts.PropertyAccessExpression;
-          handlePropertyAccessExpression(tsNode, tsNode.parent, classScope);
+          for (const classScope of classScopeStack) {
+            handlePropertyAccessExpression(tsNode, tsNode.parent, classScope);
+          }
         } else {
           const tsNode = services.esTreeNodeToTSNodeMap.get(node);
           if (
@@ -371,10 +383,12 @@ export default createRule<Options, MessageIds>({
           ) {
             const memberName = getStaticMemberAccessValue(node, context);
             if (typeof memberName === 'string') {
-              classScope.addVariableModificationByName(
-                tsNode.expression,
-                memberName,
-              );
+              for (const classScope of classScopeStack) {
+                classScope.addVariableModificationByName(
+                  tsNode.expression,
+                  memberName,
+                );
+              }
             }
           }
         }
