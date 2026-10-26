@@ -28,11 +28,9 @@ vi.mock(import('../src/createProjectService.js'), async importOriginal => {
             eventHandler: ts.server.ProjectServiceEventHandler | undefined;
           };
 
-        if (service.eventHandler) {
-          service.eventHandler({
-            eventName: ts.server.ProjectLoadingStartEvent,
-          } as ts.server.ProjectLoadingStartEvent);
-        }
+        service.eventHandler?.({
+          eventName: ts.server.ProjectLoadingStartEvent,
+        } as ts.server.ProjectLoadingStartEvent);
 
         return projectServiceSettings;
       }),

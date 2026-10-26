@@ -131,6 +131,7 @@ const rules = lazyRules({
   'only-throw-error': () => require('./only-throw-error'),
   'parameter-properties': () => require('./parameter-properties'),
   'prefer-as-const': () => require('./prefer-as-const'),
+  'prefer-at': () => require('./prefer-at'),
   'prefer-destructuring': () => require('./prefer-destructuring'),
   'prefer-enum-initializers': () => require('./prefer-enum-initializers'),
   'prefer-find': () => require('./prefer-find'),

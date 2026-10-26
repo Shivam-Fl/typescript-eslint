@@ -544,4 +544,91 @@ describe('convert', () => {
       expect(templateElement.value.cooked).toBe(`\\uXXXX`);
     });
   });
+  describe('nested sequence and binary expressions', () => {
+    function convertExpression(code: string): TSESTree.Expression {
+      const program = new Converter(convertCode(code)).convertProgram();
+      const statement = program.body[0];
+      if (statement.type !== AST_NODE_TYPES.ExpressionStatement) {
+        throw new Error('ExpressionStatement not found');
+      }
+      return statement.expression;
+    }
+
+    it('flattens an unparenthesized sequence', () => {
+      const expression = convertExpression('a, b, c');
+
+      if (expression.type !== AST_NODE_TYPES.SequenceExpression) {
+        throw new Error('SequenceExpression not found');
+      }
+      expect(expression.expressions.map(e => e.range)).toStrictEqual([
+        [0, 1],
+        [3, 4],
+        [6, 7],
+      ]);
+      expect(expression.range).toStrictEqual([0, 7]);
+    });
+
+    it('keeps a parenthesized sequence nested', () => {
+      const expression = convertExpression('(a, b), c');
+
+      if (expression.type !== AST_NODE_TYPES.SequenceExpression) {
+        throw new Error('SequenceExpression not found');
+      }
+      expect(expression.expressions.map(e => e.type)).toStrictEqual([
+        AST_NODE_TYPES.SequenceExpression,
+        AST_NODE_TYPES.Identifier,
+      ]);
+    });
+
+    it('keeps operator precedence and ranges in a mixed chain', () => {
+      const expression = convertExpression('a + b * c || d');
+
+      if (expression.type !== AST_NODE_TYPES.LogicalExpression) {
+        throw new Error('LogicalExpression not found');
+      }
+      expect(expression.range).toStrictEqual([0, 14]);
+      expect(expression.left.type).toBe(AST_NODE_TYPES.BinaryExpression);
+      expect(expression.left.range).toStrictEqual([0, 9]);
+    });
+  });
+
+  describe('long left-nested binary expression chains', () => {
+    const operandCount = 10_000;
+
+    it('converts a chain of + operators without overflowing the stack', () => {
+      const code = Array.from({ length: operandCount }, () => '"a"').join(
+        ' + ',
+      );
+      const converter = new Converter(convertCode(code));
+      const program = converter.convertProgram();
+
+      const statement = program.body[0];
+      if (statement.type !== AST_NODE_TYPES.ExpressionStatement) {
+        throw new Error('ExpressionStatement not found');
+      }
+
+      let depth = 0;
+      let current: TSESTree.Node = statement.expression;
+      while (current.type === AST_NODE_TYPES.BinaryExpression) {
+        expect(current.operator).toBe('+');
+        expect(current.right.type).toBe(AST_NODE_TYPES.Literal);
+        current = current.left;
+        depth++;
+      }
+      expect(depth).toBe(operandCount - 1);
+      expect(current.type).toBe(AST_NODE_TYPES.Literal);
+    });
+
+    it('converts a chain of || operators', () => {
+      const code = Array.from({ length: operandCount }, () => 'a').join(' || ');
+      const converter = new Converter(convertCode(code));
+      const program = converter.convertProgram();
+
+      const statement = program.body[0];
+      if (statement.type !== AST_NODE_TYPES.ExpressionStatement) {
+        throw new Error('ExpressionStatement not found');
+      }
+      expect(statement.expression.type).toBe(AST_NODE_TYPES.LogicalExpression);
+    });
+  });
 });

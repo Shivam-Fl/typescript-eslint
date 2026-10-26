@@ -42,6 +42,10 @@ foo.a !== null && foo.a !== undefined && foo.a.b;
 foo == null ? undefined : foo.a;
 foo != null ? foo.a : undefined;
 foo === null || foo === undefined ? undefined : foo.a;
+
+// With `if` statements that only call a method or function
+declare const callback: (() => void) | undefined;
+if (callback) callback();
 ```
 
 </TabItem>
@@ -59,6 +63,8 @@ foo?.a?.b?.c?.d?.e;
 !foo?.bar?.baz?.();
 
 foo?.a != null;
+
+callback?.();
 ```
 
 </TabItem>

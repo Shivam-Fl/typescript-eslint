@@ -48,35 +48,46 @@ class SimpleTraverser {
     }
   }
 
-  traverse(node: unknown, parent: TSESTree.Node | undefined): void {
-    if (!isValidNode(node)) {
-      return;
-    }
+  traverse(
+    startingNode: unknown,
+    startingParent: TSESTree.Node | undefined,
+  ): void {
+    // Iterative (not recursive) so that deeply nested trees, such as a long
+    // chain of binary operators, cannot overflow the call stack.
+    const pending: [unknown, TSESTree.Node | undefined][] = [
+      [startingNode, startingParent],
+    ];
 
-    if (this.setParentPointers) {
-      node.parent = parent;
-    }
+    for (let item = pending.pop(); item; item = pending.pop()) {
+      const [node, parent] = item;
+      if (!isValidNode(node)) {
+        continue;
+      }
 
-    if ('enter' in this.selectors) {
-      this.selectors.enter(node, parent);
-    } else if (node.type in this.selectors.visitors) {
-      this.selectors.visitors[node.type](node, parent);
-    }
+      if (this.setParentPointers) {
+        node.parent = parent;
+      }
 
-    const keys = getVisitorKeysForNode(this.allVisitorKeys, node);
-    if (keys.length < 1) {
-      return;
-    }
+      if ('enter' in this.selectors) {
+        this.selectors.enter(node, parent);
+      } else if (node.type in this.selectors.visitors) {
+        this.selectors.visitors[node.type](node, parent);
+      }
 
-    for (const key of keys) {
-      const childOrChildren = node[key];
+      const keys = getVisitorKeysForNode(this.allVisitorKeys, node);
 
-      if (Array.isArray(childOrChildren)) {
-        for (const child of childOrChildren) {
-          this.traverse(child, node);
+      // children are pushed in reverse so they are visited in key order
+      // (they are read once, right after the node itself is entered)
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const childOrChildren = node[keys[i]];
+
+        if (Array.isArray(childOrChildren)) {
+          for (let j = childOrChildren.length - 1; j >= 0; j--) {
+            pending.push([childOrChildren[j], node]);
+          }
+        } else {
+          pending.push([childOrChildren, node]);
         }
-      } else {
-        this.traverse(childOrChildren, node);
       }
     }
   }

@@ -2409,6 +2409,71 @@ class A {
     invalid: [
       {
         code: `
+import { Placeholder } from 'placeholder';
+export type Config = { placeholder: Placeholder };
+function Placeholder() {
+  return null;
+}
+export const value = Placeholder();
+        `,
+        errors: [
+          {
+            column: 1,
+            endColumn: 43,
+            endLine: 2,
+            line: 2,
+            messageId: 'typeOverValue',
+          },
+        ],
+        output: `
+import type { Placeholder } from 'placeholder';
+export type Config = { placeholder: Placeholder };
+function Placeholder() {
+  return null;
+}
+export const value = Placeholder();
+        `,
+      },
+      {
+        code: `
+import { Placeholder } from 'placeholder';
+export type Config = { placeholder: Placeholder };
+function Placeholder() {
+  return null;
+}
+export function Main() {
+  return <Placeholder />;
+}
+        `,
+        errors: [
+          {
+            column: 1,
+            endColumn: 43,
+            endLine: 2,
+            line: 2,
+            messageId: 'typeOverValue',
+          },
+        ],
+        languageOptions: {
+          parserOptions: {
+            ecmaFeatures: {
+              jsx: true,
+            },
+          },
+        },
+        output: `
+import type { Placeholder } from 'placeholder';
+export type Config = { placeholder: Placeholder };
+function Placeholder() {
+  return null;
+}
+export function Main() {
+  return <Placeholder />;
+}
+        `,
+      },
+      {
+        code: `
 import Foo from 'foo';
 export type T = Foo;
         `,

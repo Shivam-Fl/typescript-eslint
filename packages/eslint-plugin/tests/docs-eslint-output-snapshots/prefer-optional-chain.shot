@@ -37,6 +37,11 @@ foo != null ? foo.a : undefined;
 foo === null || foo === undefined ? undefined : foo.a;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
 
+// With `if` statements that only call a method or function
+declare const callback: (() => void) | undefined;
+if (callback) callback();
+~~~~~~~~~~~~~~~~~~~~~~~~~ Prefer using an optional chain expression instead, as it's more concise and easier to read.
+
 Correct
 
 foo?.a?.b?.c;
@@ -50,6 +55,8 @@ foo?.a?.b?.c?.d?.e;
 !foo?.bar?.baz?.();
 
 foo?.a != null;
+
+callback?.();
 
 Options: { "allowPotentiallyUnsafeFixesThatModifyTheReturnTypeIKnowWhatImDoing": true }
 
