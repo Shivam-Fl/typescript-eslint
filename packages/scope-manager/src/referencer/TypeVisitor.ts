@@ -26,6 +26,18 @@ export class TypeVisitor extends Visitor {
   // Visit helpers //
   ///////////////////
 
+  /**
+   * Visits the left side of a qualified name like `A.B`.
+   * An identifier there is a namespace lookup, not a plain type lookup.
+   */
+  protected visitQualifier(node: TSESTree.Node): void {
+    if (node.type === AST_NODE_TYPES.Identifier) {
+      this.#referencer.currentScope().referenceType(node, true);
+    } else {
+      this.visit(node);
+    }
+  }
+
   protected visitFunctionType(
     node:
       | TSESTree.TSCallSignatureDeclaration
@@ -85,7 +97,7 @@ export class TypeVisitor extends Visitor {
   }
 
   protected MemberExpression(node: TSESTree.MemberExpression): void {
-    this.visit(node.object);
+    this.visitQualifier(node.object);
     // don't visit the property
   }
 
@@ -219,7 +231,7 @@ export class TypeVisitor extends Visitor {
   }
 
   protected TSQualifiedName(node: TSESTree.TSQualifiedName): void {
-    this.visit(node.left);
+    this.visitQualifier(node.left);
     // we don't visit the right as it a name on the thing, not a name to reference
   }
 

@@ -39,6 +39,22 @@ ruleTester.run('no-unused-vars', rule, {
   },
   valid: [
     `
+import type * as T from 'a';
+
+export class Foo<T> implements T.Bar {
+  method(value: T) {
+    console.log(value);
+  }
+}
+    `,
+    `
+import type * as T from 'a';
+
+export interface Foo<T> extends T.Bar {
+  method(value: T): void;
+}
+    `,
+    `
 import { ClassDecoratorFactory } from 'decorators';
 @ClassDecoratorFactory()
 export class Foo {}

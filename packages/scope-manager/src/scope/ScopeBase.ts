@@ -243,6 +243,12 @@ export abstract class ScopeBase<
         return false;
       }
 
+      // the qualifier of `T.Foo` is a namespace, so a type-only variable
+      // (such as a type parameter named `T`) must not capture it
+      if (ref.isQualifierReference && !variable.isValueVariable) {
+        return false;
+      }
+
       variable.references.push(ref);
       ref.resolved = variable;
 
@@ -397,7 +403,7 @@ export abstract class ScopeBase<
     this.leftToResolve?.push(ref);
   }
 
-  public referenceType(node: TSESTree.Identifier): void {
+  public referenceType(node: TSESTree.Identifier, isQualifier = false): void {
     const ref = new Reference(
       node,
       this as Scope,
@@ -405,7 +411,9 @@ export abstract class ScopeBase<
       null,
       null,
       false,
-      ReferenceTypeFlag.Type,
+      isQualifier
+        ? ReferenceTypeFlag.Type | ReferenceTypeFlag.Qualifier
+        : ReferenceTypeFlag.Type,
     );
 
     this.references.push(ref);

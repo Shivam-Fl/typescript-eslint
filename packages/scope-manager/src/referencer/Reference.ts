@@ -22,6 +22,11 @@ const generator = createIdGenerator();
 export enum ReferenceTypeFlag {
   Value = 0x1,
   Type = 0x2,
+  /**
+   * The qualifier of a qualified type name, like `A` in `A.B`.
+   * It can only refer to something that is also a value, such as a namespace.
+   */
+  Qualifier = 0x4,
 }
 
 /**
@@ -110,6 +115,14 @@ export class Reference {
    */
   public get isValueReference(): boolean {
     return (this.#referenceType & ReferenceTypeFlag.Value) !== 0;
+  }
+
+  /**
+   * True if this reference is the leftmost name of a qualified type name,
+   * like `A` in `A.B`, so it can only refer to a namespace-like value
+   */
+  public get isQualifierReference(): boolean {
+    return (this.#referenceType & ReferenceTypeFlag.Qualifier) !== 0;
   }
 
   /**
