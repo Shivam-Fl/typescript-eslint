@@ -142,29 +142,22 @@ export class TypeVisitor extends Visitor {
     let scope = this.#referencer.currentScope();
 
     /*
-    In cases where there is a sub-type scope created within a conditional type, then the generic should be defined in the
-    conditional type's scope, not the child type scope.
-    If we define it within the child type's scope then it won't be able to be referenced outside the child type
+    An inferred type parameter is bound by the closest conditional type whose `extends` clause contains it.
+    It may be nested inside child type scopes (function types, mapped types), or inside another conditional type
+    (e.g. `A extends (B extends unknown ? infer R : never) ? R : never`), so the generic must be defined in
+    the scope of that conditional type, not in the innermost scope.
     */
-    if (
-      scope.type === ScopeType.functionType ||
-      scope.type === ScopeType.mappedType
+    for (
+      let currentScope: Scope | null = scope;
+      currentScope;
+      currentScope = currentScope.upper
     ) {
-      // search up the scope tree to figure out if we're in a nested type scope
-      let currentScope = scope.upper as Scope | undefined;
-      while (currentScope) {
-        if (
-          currentScope.type === ScopeType.functionType ||
-          currentScope.type === ScopeType.mappedType
-        ) {
-          // ensure valid type parents only
-          currentScope = currentScope.upper;
-          continue;
-        }
-        if (currentScope.type === ScopeType.conditionalType) {
-          scope = currentScope;
-          break;
-        }
+      if (
+        currentScope.type === ScopeType.conditionalType &&
+        currentScope.block.extendsType.range[0] <= node.range[0] &&
+        node.range[1] <= currentScope.block.extendsType.range[1]
+      ) {
+        scope = currentScope;
         break;
       }
     }
