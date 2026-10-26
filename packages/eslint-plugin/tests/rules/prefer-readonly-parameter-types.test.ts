@@ -709,6 +709,14 @@ function foo(arg: import('foo-lib').Foo) {}
         },
       ],
     },
+    {
+      code: `
+declare const base: { a: string };
+const spread = { ...base } as const;
+function foo(arg: typeof spread) {}
+      `,
+      name: 'spread object asserted as const',
+    },
   ],
   invalid: [
     // arrays

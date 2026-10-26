@@ -17,6 +17,7 @@ import {
   getModifiers,
   getParserServices,
   isNullableType,
+  isPropertyReadonlyInType,
   isStartOfArrowFunctionBodyNeedingParentheses,
   isStartOfExpressionStatementNeedingParentheses,
   isTypeFlagSet,
@@ -390,8 +391,8 @@ export default createRule<Options, MessageIds>({
         const name = prop.getEscapedName();
         return (
           castPropNames.has(name) &&
-          tsutils.isPropertyReadonlyInType(uncast, name, checker) ===
-            tsutils.isPropertyReadonlyInType(cast, name, checker)
+          isPropertyReadonlyInType(uncast, name, checker) ===
+            isPropertyReadonlyInType(cast, name, checker)
         );
       });
     }
